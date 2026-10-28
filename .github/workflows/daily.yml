@@ -18,7 +18,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   daily:
-    if: github.event.repository.private == false && github.ref == 'refs/heads/main' && (github.event_name == 'workflow_dispatch' || vars.ENGINE_ENABLED == 'true')
+    if: github.event.repository.private == false && github.ref == 'refs/heads/main' && (github.event_name == 'workflow_dispatch' || (vars.ENGINE_ENABLED == 'true' && vars.ACTIONS_PRODUCTION_APPROVED == 'true'))
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:
@@ -27,6 +27,10 @@ jobs:
       AMAZON_ASSOCIATE_TAG: ${{ secrets.AMAZON_ASSOCIATE_TAG }}
       PINTEREST_ACCESS_TOKEN: ${{ secrets.PINTEREST_ACCESS_TOKEN }}
       PINTEREST_BOARD_ID: ${{ secrets.PINTEREST_BOARD_ID }}
+      PINTEREST_CLIENT_ID: ${{ secrets.PINTEREST_CLIENT_ID }}
+      PINTEREST_CLIENT_SECRET: ${{ secrets.PINTEREST_CLIENT_SECRET }}
+      PINTEREST_REFRESH_TOKEN: ${{ secrets.PINTEREST_REFRESH_TOKEN }}
+      REPO_SECRETS_TOKEN: ${{ secrets.REPO_SECRETS_TOKEN }}
       YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
       YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
       YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
@@ -35,6 +39,7 @@ jobs:
       PINTEREST_PUBLISH: ${{ vars.PINTEREST_PUBLISH }}
       YOUTUBE_PUBLISH: ${{ vars.YOUTUBE_PUBLISH }}
       PUBLISHING_REVIEWED: ${{ vars.PUBLISHING_REVIEWED }}
+      ACTIONS_PRODUCTION_APPROVED: ${{ vars.ACTIONS_PRODUCTION_APPROVED }}
       ENGINE_CHECKPOINT_PUSH: 'true'
       GITHUB_TOKEN: ${{ github.token }}
     steps:

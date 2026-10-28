@@ -10,7 +10,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   report:
-    if: github.event.repository.private == false && github.ref == 'refs/heads/main' && (github.event_name == 'workflow_dispatch' || vars.ENGINE_ENABLED == 'true')
+    if: github.event.repository.private == false && github.ref == 'refs/heads/main' && (github.event_name == 'workflow_dispatch' || (vars.ENGINE_ENABLED == 'true' && vars.ACTIONS_PRODUCTION_APPROVED == 'true'))
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:

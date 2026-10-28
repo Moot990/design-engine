@@ -23,9 +23,12 @@ def readiness(settings, publishing=False):
         if os.environ.get(flag) != "true":
             missing.append(flag + "=true (repository variable)")
     if publishing:
+        if os.environ.get("GITHUB_ACTIONS") == "true" and os.environ.get("ACTIONS_PRODUCTION_APPROVED") != "true":
+            missing.append("ACTIONS_PRODUCTION_APPROVED=true only after GitHub confirms this production use")
         if not any(os.environ.get(p + "_PUBLISH") == "true" for p in ("PINTEREST", "YOUTUBE")):
             missing.append("Enable PINTEREST_PUBLISH or YOUTUBE_PUBLISH after platform setup")
-        for platform, names in (("PINTEREST", ["PINTEREST_ACCESS_TOKEN", "PINTEREST_BOARD_ID"]), ("YOUTUBE", ["YOUTUBE_CLIENT_ID", "YOUTUBE_CLIENT_SECRET", "YOUTUBE_REFRESH_TOKEN"])):
+        pinterest_names = ["PINTEREST_BOARD_ID"] + (["PINTEREST_CLIENT_ID", "PINTEREST_CLIENT_SECRET", "PINTEREST_REFRESH_TOKEN", "REPO_SECRETS_TOKEN"] if os.environ.get("PINTEREST_REFRESH_TOKEN") else ["PINTEREST_ACCESS_TOKEN"])
+        for platform, names in (("PINTEREST", pinterest_names), ("YOUTUBE", ["YOUTUBE_CLIENT_ID", "YOUTUBE_CLIENT_SECRET", "YOUTUBE_REFRESH_TOKEN"])):
             if os.environ.get(platform + "_PUBLISH") == "true":
                 missing.extend(name for name in names if not os.environ.get(name))
         if os.environ.get("PUBLISHING_REVIEWED") != "true":

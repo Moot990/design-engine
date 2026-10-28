@@ -106,6 +106,8 @@ def vision_review(settings, path, idea):
         "perspective, floating objects, duplicated items, text/logos, implausible lighting, or poor styling. "
         "Designer quality score is 1 to 5; approval requires at least 4."
     ), [path])
+    if not isinstance(result, dict):
+        raise EngineError("Visual review returned an invalid response")
     approved = all(result.get(k) is True for k in ("approved", "geometry_ok", "no_text_or_watermarks", "featured_item_visible"))
     return approved and isinstance(result.get("designer_quality"), int) and result["designer_quality"] >= 4
 

@@ -16,6 +16,7 @@ from engine.media import caption_frame
 from engine.pipeline import record_publication, short_copy
 from engine.products import product_pack
 from engine.providers import fingerprint, fixture_image, is_duplicate, pin_text
+from engine.publish import pinterest, pinterest_bearer, youtube
 
 
 class EngineTests(unittest.TestCase):
@@ -131,6 +132,42 @@ class EngineTests(unittest.TestCase):
             self.assertEqual(len(PdfReader(path).pages), 1)
         with self.assertRaises(EngineError):
             product_pack([entry], self.directory / "real-pack")
+
+    def test_pinterest_payload_uses_base64_and_disclosure(self):
+        image = self.directory / "pin.jpg"
+        fixture_image(image, 0)
+        reply = Mock()
+        reply.json.return_value = {"id": "12345"}
+        with patch("engine.publish.request", return_value=reply) as call, patch("engine.publish.pinterest_bearer", return_value="test-only"):
+            self.assertEqual(pinterest(image, "A useful room idea", DISCLOSURE, "https://www.amazon.sa/s?k=lamp&tag=test-21", "1234"), "12345")
+            payload = call.call_args.kwargs["json"]
+            self.assertEqual(payload["media_source"]["source_type"], "image_base64")
+            self.assertIn("#ad", payload["description"])
+            self.assertNotIn("retry_safe", call.call_args.kwargs)
+
+    def test_youtube_payload_sets_ai_disclosure_and_private(self):
+        video = self.directory / "test.mp4"
+        video.write_bytes(b"test-fixture")
+        token = Mock()
+        token.json.return_value = {"access_token": "ephemeral-test-token"}
+        start = Mock(headers={"Location": "https://www.googleapis.com/upload/session-test"})
+        finish = Mock()
+        finish.json.return_value = {"id": "video123", "status": {"privacyStatus": "private"}}
+        with patch("engine.publish.request", side_effect=[token, start, finish]) as call, patch("engine.publish.secret", return_value="test-only"):
+            self.assertEqual(youtube(video, "Example", DISCLOSURE), ("video123", "private"))
+            status = call.call_args_list[1].kwargs["json"]["status"]
+            self.assertTrue(status["containsSyntheticMedia"])
+            self.assertEqual(status["privacyStatus"], "private")
+            self.assertNotIn("retry_safe", call.call_args_list[2].kwargs)
+
+    def test_pinterest_rotation_persists_before_using_new_token(self):
+        pinterest_bearer.cache_clear()
+        response = Mock()
+        response.json.return_value = {"access_token": "new-test-access", "refresh_token": "rotated-test-refresh"}
+        with patch.dict("os.environ", {"PINTEREST_REFRESH_TOKEN": "old-test-refresh"}), patch("engine.publish.secret", return_value="test-only"), patch("engine.publish.request", return_value=response), patch("engine.publish.save_refresh_secret") as save:
+            self.assertEqual(pinterest_bearer(), "new-test-access")
+            save.assert_called_once_with("PINTEREST_REFRESH_TOKEN", "rotated-test-refresh")
+        pinterest_bearer.cache_clear()
 
 
 if __name__ == "__main__":

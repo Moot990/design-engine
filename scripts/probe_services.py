@@ -3,8 +3,8 @@ import asyncio
 import json
 from pathlib import Path
 
-from engine.common import EngineError, request, response_json, save_json
-from engine.media import _voice, probe
+from engine.common import EngineError, config, request, response_json, save_json
+from engine.media import _voice, probe, render_short
 
 results = {"pollinations_no_key": "not tested", "edge_tts": "not tested", "gemini": "not tested: requires your free-tier key", "pinterest": "not tested: requires your approved app/token", "youtube": "not tested: requires your channel OAuth", "amazon_attribution": "not tested: requires your Associates account"}
 try:
@@ -17,6 +17,13 @@ try:
     target.parent.mkdir(parents=True, exist_ok=True)
     asyncio.run(_voice("Compare texture and light before choosing furniture.", "en-US-AriaNeural", target))
     results["edge_tts"] = {"status": "live synthesis succeeded", "seconds": float(probe(target)["format"]["duration"])}
+    sources = sorted(Path("output/smoke/image-archive").glob("*.jpg"))[:4]
+    copy = {"hook": "TEST - Four details to check", "captions": ["Check the room proportions.", "Balance smooth and woven textures.", "Layer soft light.", "Leave a clear walking route."], "script": "Check the room proportions before choosing a sofa. Balance smooth and woven textures. Layer soft light instead of relying on one ceiling light. Finally, leave a clear walking route around the main seating area."}
+    video, warnings = render_short(sources, copy, config(), "en", "output/voiced-test", fixture=False)
+    results["narrated_fixture_short"] = {"has_audio": any(s["codec_type"] == "audio" for s in probe(video)["streams"]), "warnings": warnings}
+    arabic = Path("output/qa/tts-probe-ar.mp3")
+    asyncio.run(_voice("اختبر توازن الخامات والإضاءة قبل اختيار أثاث غرفة المعيشة.", "ar-SA-ZariyahNeural", arabic))
+    results["arabic_edge_tts"] = {"status": "live synthesis succeeded", "seconds": float(probe(arabic)["format"]["duration"])}
 except EngineError as error:
     results["edge_tts"] = str(error)
 save_json("output/service-probes.json", results)

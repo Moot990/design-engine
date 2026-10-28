@@ -31,8 +31,6 @@ on commit `bbb88d7`: **success**.
 - Official GitHub actions were updated and pinned to verified commit hashes.
 - Pollinations no-key generation again returned HTTP 401.
 
-## Still needs your accounts
-
 ## Final code verification
 
 [Run 40780001411](https://github.com/Moot990/design-engine/actions/runs/40780001411)

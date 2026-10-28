@@ -1,0 +1,40 @@
+timezone: Asia/Riyadh
+pins_per_day: 4
+short_seconds: 24
+gemini_model: gemini-2.5-flash
+image_model: zimage
+require_vision_review: true
+youtube_privacy: private
+voices:
+  en: [en-US-AriaNeural, en-US-GuyNeural]
+  ar: [ar-SA-ZariyahNeural, ar-SA-HamedNeural]
+# New rooms are disabled until the living-room series has been reviewed.
+rooms:
+  - {id: living-room, en: living room, ar: غرفة معيشة}
+styles:
+  - {id: warm-minimal, en: warm minimal, ar: بساطة دافئة}
+  - {id: contemporary, en: contemporary, ar: معاصر}
+  - {id: japandi, en: Japandi, ar: جاباندي}
+  - {id: modern-arabian, en: modern Arabian, ar: عربي معاصر}
+  - {id: organic-modern, en: organic modern, ar: عضوي معاصر}
+palettes:
+  - {id: sand-olive, colors: ['#E2D5BF', '#737A55', '#403C34'], en: sand and olive, ar: رملي وزيتوني}
+  - {id: cream-walnut, colors: ['#F2EBDE', '#73523C', '#B59A7A'], en: cream and walnut, ar: كريمي وجوزي}
+  - {id: clay-linen, colors: ['#B5745D', '#E8DFD1', '#6B6558'], en: clay and linen, ar: طيني وكتاني}
+  - {id: stone-blue, colors: ['#DDD9D0', '#6C8593', '#4D5559'], en: stone and blue, ar: حجري وأزرق}
+  - {id: taupe-charcoal, colors: ['#B7A999', '#393C3B', '#E6DFD4'], en: taupe and charcoal, ar: تاوب وفحمي}
+items:
+  - {id: sofa, en: linen sofa, ar: أريكة كتانية, query: linen sofa}
+  - {id: lamp, en: floor lamp, ar: مصباح أرضي, query: floor lamp}
+  - {id: rug, en: textured rug, ar: سجادة منسوجة, query: living room rug}
+  - {id: table, en: coffee table, ar: طاولة قهوة, query: coffee table}
+  - {id: curtains, en: linen curtains, ar: ستائر كتانية, query: linen curtains}
+  - {id: chair, en: accent chair, ar: كرسي جانبي, query: accent chair}
+formats:
+  - {id: layout, en: A layout detail to try, ar: تفصيلة في التوزيع تستحق التجربة, tip: Keep a clear walking route around the main seating.}
+  - {id: texture, en: Layer texture with restraint, ar: تنسيق الخامات ببساطة, tip: Mix a smooth surface with a woven texture for contrast.}
+  - {id: lighting, en: Give the room a softer evening mood, ar: إضاءة هادئة للمساء, tip: Layer a shaded lamp with ambient light instead of relying on one ceiling light.}
+  - {id: proportion, en: Balance the main furniture, ar: توازن قطع الأثاث, tip: Compare the furniture scale with the room before buying.}
+  - {id: focal-point, en: Build one clear focal point, ar: نقطة تركيز واضحة, tip: Let one material or shape lead and keep surrounding details quieter.}
+# Optional future links. Use only a store page that you own and have reviewed.
+digital_product_url: ''

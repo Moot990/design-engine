@@ -1,7 +1,11 @@
 # Cloud test evidence
 
+The optional FreeVideo update has separate [local measurements and cloud tests](FREEVIDEO-TEST.md).
+
 All behavioral tests and rendering ran on GitHub-hosted standard Ubuntu runners.
-The laptop only ran Python compile/syntax checks and downloaded small QA files.
+For the original cloud engine, the laptop only ran syntax checks and downloaded
+small QA files. The owner subsequently authorized one local FreeVideo sample;
+that exception is recorded separately above.
 
 ## First run
 

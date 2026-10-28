@@ -1,6 +1,19 @@
 timezone: Asia/Riyadh
 pins_per_day: 4
 short_seconds: 24
+# Local opt-in. Standard GitHub-hosted runners always use ffmpeg.
+video_backend: ffmpeg
+freevideo:
+  quality: light # light or medium
+  width: 544
+  height: 960
+  clip_seconds: 5
+  max_ai_clips_per_week: 2
+  max_minutes_per_run: 12
+  cooldown_seconds: 30
+  max_gpu_temperature_c: 82
+  # Keep false pending clarification of worldwide output distribution rights.
+  publication_cleared: false
 gemini_model: gemini-2.5-flash
 image_model: zimage
 require_vision_review: true

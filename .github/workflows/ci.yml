@@ -24,7 +24,7 @@ jobs:
           python -m pip install -r requirements.txt
       - name: Syntax and behavioral tests
         run: |
-          python -m compileall -q engine scripts tests
+          python -m compileall -q engine scripts tests run_weekly.py
           python -m unittest discover -s tests -v
       - name: Render full sample daily batch (no credentials, no publishing)
         run: python -m engine run --mode smoke --day 2026-10-29 --output output/smoke --state output/smoke-state
@@ -34,6 +34,8 @@ jobs:
           pdftoppm -f 1 -singlefile -scale-to 1200 -png output/sample-pack/mood-boards.pdf output/qa/mood-board
           pdftoppm -f 1 -singlefile -scale-to 1200 -png output/sample-pack/palette-sheets.pdf output/qa/palette
           pdftoppm -f 1 -singlefile -scale-to 1200 -png output/sample-pack/style-guide.pdf output/qa/guide
+      - name: Verify weekly assembler with ffmpeg default
+        run: python run_weekly.py --batch output/smoke --output output/weekly-test --allow-fixtures
       - name: Probe no-key access and live TTS (report availability separately)
         run: python -m scripts.probe_services
       - name: Test summary

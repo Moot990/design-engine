@@ -7,7 +7,7 @@ from urllib.parse import parse_qs, urlencode, urlparse
 from .common import EngineError, read_csv
 
 DISCLOSURE = "#ad As an Amazon Associate I earn from qualifying purchases. إعلان: بصفتي شريك أمازون، أكسب من المشتريات المؤهلة."
-AI_NOTICE = "AI-generated design concept; similar-item inspiration, not an exact product match. تصور تصميم مولد بالذكاء الاصطناعي؛ المنتجات المقترحة مشابهة وليست مطابقة."
+AI_NOTICE = "AI-generated design imagery/video; similar-item inspiration, not an exact product match. صور وفيديو لتصور تصميم مولد بالذكاء الاصطناعي؛ المنتجات المقترحة مشابهة وليست مطابقة."
 
 
 def affiliate_link(idea, tag, products_file, today=None):

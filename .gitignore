@@ -55,6 +55,7 @@ temp/
 
 # Local agent state and operating system files
 .claude-flow/
+.local/
 .DS_Store
 Thumbs.db
 Desktop.ini

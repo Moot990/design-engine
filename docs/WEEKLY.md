@@ -51,3 +51,15 @@ the same Associate earnings under several posts/platforms.
   permanent backups. Keep wanted outputs in your own chosen storage manually.
 
 At day 90 fill [DAY-90.md](DAY-90.md) with evidence and keep/change/cut decisions.
+
+## Optional local FreeVideo preview
+
+ffmpeg is still the default. See [FREEVIDEO.md](FREEVIDEO.md) for the local-only
+adapter, five-second Light/Medium clips, quota, time cap and cooldown settings.
+This feature needs the laptop running; standard cloud runners cannot reach it.
+
+Before any manual upload, in **YouTube Studio > Details > Altered content**, choose
+**Yes** for these realistic AI interiors. Keep the written AI disclosure in every
+Pin and video description. FreeVideo clips additionally identify MiniMax H3.
+Check current worldwide output rights before publishing FreeVideo previews; being
+in Saudi Arabia alone does not resolve the license's excluded-territory restriction.

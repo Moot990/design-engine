@@ -76,6 +76,16 @@ The affiliate tag is configured through a Secret, but it is intentionally public
 inside published affiliate URLs and generated upload manifests. That identifier
 is not an account access credential. Actual credentials stay in memory/environment.
 
+## Optional local video backend
+
+`run_weekly.py` can reassemble an extracted daily batch using a running local
+FreeVideo agent. `video_backend: ffmpeg` remains the default. The optional adapter
+uses five-second first-frame clips, a persistent weekly attempt budget, a deadline,
+cooldowns, temperature monitoring and ffmpeg fallback. It never installs software
+or fetches models. See [local setup, limits and license findings](docs/FREEVIDEO.md).
+The owner separately authorized one laptop sample; normal cloud operation stays
+as described above. FreeVideo public output is gated pending territorial clarity.
+
 ## Editing and recovery
 
 Edit YAML/CSV with GitHub's pencil button, then Commit changes to `main`.

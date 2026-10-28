@@ -4,6 +4,9 @@
 - Run only quick syntax checks locally. Execute behavior tests, image/video
   generation, ffmpeg rendering and PDF rendering on GitHub Actions.
 - Do not install heavy software on the laptop.
+- The owner authorized the optional local FreeVideo integration and one diagnostic
+  sample clip. Keep ffmpeg as default. Further unattended local AI generation is
+  opt-in; do not download models or change cooling/power settings without asking.
 - Store credentials only in GitHub Secrets; never log request headers, OAuth
   responses, bearer tokens or signed upload-session URLs.
 - Generated affiliate links intentionally expose the public Associates tag;

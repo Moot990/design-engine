@@ -154,12 +154,15 @@ def run(settings, mode, day, output, state_dir):
             language = "ar" if int(day.replace("-", "")) % 2 else "en"
             try:
                 copy = short_copy(settings, scenes, language, fixture)
-                video, media_warnings = render_short([a["image"] for a in scenes], copy, settings, language, output / "video", fixture=fixture, variant=date.fromisoformat(day).toordinal())
+                video, media_warnings = render_short([a["image"] for a in scenes], copy, settings, language, output / "video", fixture=fixture, variant=date.fromisoformat(day).toordinal(), publishing=mode == "publish")
                 warnings.extend(media_warnings)
                 if not fixture:
                     for frame in (output / "video").glob("frame-*.png"):
                         frame.unlink()
                 description = f"{DISCLOSURE}\n{AI_NOTICE}\n{copy['script']}\n\nSimilar-item inspiration:\n" + "\n".join(a["link"] for a in scenes) + "\nProduct links are not clickable in Shorts descriptions; use the channel profile. #Shorts"
+                ai_report = output / "video/freevideo/freevideo-result.json"
+                if ai_report.exists() and json.loads(ai_report.read_text(encoding="utf-8")).get("used_ai_clips", 0):
+                    description += "\nAI video animation: MiniMax H3 via FreeVideo."
                 short_meta = {"video_file": "video/short.mp4", "title": copy["hook"], "description": description, "language": language, "privacy": settings["youtube_privacy"], "contains_synthetic_media": True, "status": "fixture" if fixture else "ready-for-manual-upload"}
                 write_csv(output / "youtube-upload-manifest.csv", [short_meta], list(short_meta))
                 save_json(output / "short-copy.json", copy)

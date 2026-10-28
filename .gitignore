@@ -1,0 +1,60 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.venv/
+venv/
+env/
+
+# Secrets and local configuration
+.env
+.env.*
+*.pem
+*.key
+secrets.*
+credentials.*
+
+# Build and generated output
+build/
+dist/
+output/
+outputs/
+artifacts/
+renders/
+tmp/
+temp/
+*.log
+
+# Media
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.webp
+*.bmp
+*.tif
+*.tiff
+*.svg
+*.ico
+*.mp4
+*.mov
+*.avi
+*.mkv
+*.webm
+*.mp3
+*.wav
+*.m4a
+*.flac
+*.ogg
+*.aac
+
+# Local agent state and operating system files
+.claude-flow/
+.DS_Store
+Thumbs.db
+Desktop.ini

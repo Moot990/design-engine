@@ -62,6 +62,7 @@ class FreeVideoTests(unittest.TestCase):
 
     def test_attempt_quota_and_cancellation_survive_failure(self):
         client = Mock()
+        client.cancel.return_value = True
         def call(method, path, body=None, **kwargs):
             if path == PREFIX:
                 return {"ready": True, "features": {"generate.first_frame": True}, "queue": {}}

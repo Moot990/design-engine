@@ -221,7 +221,7 @@ def animate_selected(images, settings, directory, *, publishing=False, budget_pa
             report["status"] = "complete"
     except Exception as error:
         if client and job_id:
-            report["cancellation_requested"] = client.cancel(job_id)
+            report["cancellation_requested"] = client.cancel(job_id) is True
         warnings.append(str(error) if isinstance(error, EngineError) else "FreeVideo failed: " + type(error).__name__)
         clips = {}  # Keep failed/partial AI assets local but assemble a full ffmpeg fallback.
     finally:

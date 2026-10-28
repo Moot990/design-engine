@@ -15,6 +15,7 @@ from .providers import fixture_image, fingerprint, gemini, generate_image, is_du
 from .reporting import weekly
 
 IDEA_FIELDS = ["idea_id", "date", "room", "style", "palette", "item", "format", "language", "status"]
+PIN_FIELDS = ["idea_id", "image_file", "title", "description", "link", "board", "board_id", "language", "status", "remote_id"]
 
 
 def readiness(settings, publishing=False):
@@ -142,7 +143,7 @@ def run(settings, mode, day, output, state_dir):
                 warnings.append(idea["id"] + ": " + str(error))
             write_csv(state_dir / "ideas.csv", rows, IDEA_FIELDS)
             save_json(state_file, history)
-        write_csv(output / "pinterest-upload-manifest.csv", pins[:settings["pins_per_day"]], ["idea_id", "image_file", "title", "description", "link", "board", "board_id", "language", "status"])
+        write_csv(output / "pinterest-upload-manifest.csv", pins[:settings["pins_per_day"]], PIN_FIELDS)
         # Preserve only accepted source images/metadata for monthly products.
         if not fixture:
             checkpoint("Record generated images and quality outcomes " + day)
@@ -179,6 +180,18 @@ def run(settings, mode, day, output, state_dir):
                     record_publication(history, state_file, day, "short-" + day, "youtube", lambda: publish.youtube(video, short_meta["title"], short_meta["description"], settings["youtube_privacy"], short_meta["language"]))
                 except EngineError as error:
                     warnings.append(str(error))
+        # Exports must reflect actual API outcomes so manual fallback cannot invite
+        # a second upload of an already-published or ambiguous item.
+        for pin in pins:
+            result = history["publications"].get("pin-" + pin["idea_id"])
+            if result:
+                pin.update(status=result["status"], remote_id=result.get("remote_id", ""))
+        write_csv(output / "pinterest-upload-manifest.csv", pins[:settings["pins_per_day"]], PIN_FIELDS)
+        if short_meta:
+            result = history["publications"].get("short-" + day)
+            if result:
+                short_meta.update(status=result["status"], remote_id=result.get("remote_id", ""), privacy=result.get("privacy", short_meta["privacy"]))
+            write_csv(output / "youtube-upload-manifest.csv", [short_meta], list(short_meta))
         history["runs"][day]["status"] = "complete" if len(pins) >= settings["pins_per_day"] and video else "partial"
         if warnings:
             history["runs"][day]["status"] = "needs-review"

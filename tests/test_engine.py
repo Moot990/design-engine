@@ -13,7 +13,7 @@ from engine.affiliate import AI_NOTICE, DISCLOSURE, affiliate_link, validate_aff
 from engine.common import ROOT, EngineError, config, request, write_csv
 from engine.ideas import candidates, ledger_row
 from engine.media import caption_frame
-from engine.pipeline import record_publication, short_copy
+from engine.pipeline import record_publication, short_copy, run as run_pipeline
 from engine.products import product_pack
 from engine.providers import fingerprint, fixture_image, is_duplicate, pin_text
 from engine.publish import pinterest, pinterest_bearer, youtube
@@ -169,6 +169,36 @@ class EngineTests(unittest.TestCase):
             save.assert_called_once_with("PINTEREST_REFRESH_TOKEN", "rotated-test-refresh")
         pinterest_bearer.cache_clear()
 
-
+    def test_full_publishing_control_flow_exports_confirmed_ids_and_blocks_rerun(self):
+        state = self.directory / "state"
+        state.mkdir()
+        (state / "ideas.csv").write_text((ROOT / "state/ideas.csv").read_text(encoding="utf-8-sig"), encoding="utf-8")
+        (state / "history.json").write_text('{"images":{},"publications":{},"runs":{}}')
+        products = self.directory / "data"
+        products.mkdir()
+        (products / "products.csv").write_text((ROOT / "data/products.csv").read_text(encoding="utf-8-sig"), encoding="utf-8")
+        count = [0]
+        def image(settings, prompt, seed, destination):
+            fixture_image(destination, count[0])
+            count[0] += 1
+        def render(images, copy, settings, language, directory, **kwargs):
+            Path(directory).mkdir(parents=True)
+            output = Path(directory) / "short.mp4"
+            output.write_bytes(b"test")
+            return output, []
+        copy = {"title": "A practical room idea", "description": DISCLOSURE, "script": "A practical design lesson."}
+        short = {"hook": "Four useful room details", "script": "A useful design lesson", "captions": ["one", "two", "three", "four"]}
+        environment = {"GEMINI_API_KEY": "test", "POLLINATIONS_API_KEY": "test", "AMAZON_ASSOCIATE_TAG": "test-21", "GEMINI_FREE_TIER_CONFIRMED": "true", "POLLINATIONS_QUEST_ONLY": "true", "PINTEREST_PUBLISH": "true", "YOUTUBE_PUBLISH": "true", "PINTEREST_ACCESS_TOKEN": "test", "PINTEREST_BOARD_ID": "123", "PINTEREST_REFRESH_TOKEN": "", "YOUTUBE_CLIENT_ID": "test", "YOUTUBE_CLIENT_SECRET": "test", "YOUTUBE_REFRESH_TOKEN": "test", "PUBLISHING_REVIEWED": "true", "ACTIONS_PRODUCTION_APPROVED": "true"}
+        with patch.dict("os.environ", environment), patch("engine.pipeline.ROOT", self.directory), patch("engine.pipeline.checkpoint"), patch("engine.pipeline.generate_image", side_effect=image), patch("engine.pipeline.vision_review", return_value=True), patch("engine.pipeline.is_duplicate", return_value=False), patch("engine.pipeline.pin_text", return_value=copy), patch("engine.pipeline.short_copy", return_value=short), patch("engine.pipeline.render_short", side_effect=render), patch("engine.pipeline.publish.pinterest", return_value="pin123") as pin, patch("engine.pipeline.publish.youtube", return_value=("video123", "private")) as video:
+            output = self.directory / "output"
+            run_pipeline(self.settings, "publish", "2026-10-29", output, state)
+            self.assertEqual(pin.call_count, 4)
+            self.assertEqual(video.call_count, 1)
+            self.assertIn("published,pin123", (output / "pinterest-upload-manifest.csv").read_text(encoding="utf-8-sig"))
+            self.assertIn("video123", (output / "youtube-upload-manifest.csv").read_text(encoding="utf-8-sig"))
+            self.assertEqual(len(json.loads((state / "history.json").read_text())["publications"]), 5)
+            with self.assertRaises(EngineError):
+                run_pipeline(self.settings, "publish", "2026-10-29", output, state)
+            self.assertEqual(pin.call_count, 4)
 if __name__ == "__main__":
     unittest.main(verbosity=2)

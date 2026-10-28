@@ -72,15 +72,24 @@ freevideo:
   publication_cleared: false
 ```
 
+The FreeVideo interpreter on this laptop lacks edge-tts and Arabic RAQM shaping.
+Use an isolated small client/assembly environment (tens of MB; no models/CUDA),
+separate from the app. The environment was created for the requested sample:
+
+```powershell
+python -m venv .local/video-runtime
+.local/video-runtime/Scripts/python.exe -m pip install --only-binary=:all: -r requirements-local-video.txt
+```
+
 With the installed app running:
 
 ```powershell
-python run_weekly.py --batch output/daily --output output/weekly --local-preview
+.local/video-runtime/Scripts/python.exe run_weekly.py --batch output/daily --output output/weekly --local-preview
 ```
 
-Use a Python environment with this project's small Python dependencies and
-existing ffmpeg/ffprobe. Windows Arial/Segoe UI fonts are supported; Arabic text
-still requires a Pillow build with RAQM. Nothing is installed automatically.
+Use the existing ffmpeg/ffprobe. Windows Arial/Segoe UI fonts are supported; Arabic
+uses RAQM when available or arabic-reshaper/python-bidi otherwise. The adapter
+never installs anything automatically. The app's own environment is unchanged.
 
 Remove `--local-preview` only when preparing publication output. With
 `publication_cleared: false`, publication mode falls back to ffmpeg. Change that

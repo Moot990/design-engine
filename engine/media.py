@@ -55,15 +55,22 @@ def wrap_pixels(draw, text, font, width, **kwargs):
 
 
 def caption_frame(image_path, title, lesson, language, destination, variant=0, *, transparent=False):
-    if language == "ar" and not features.check("raqm"):
-        raise EngineError("Arabic rendering requires Pillow RAQM")
+    fallback_arabic = language == "ar" and not features.check("raqm")
+    if fallback_arabic:
+        try:
+            import arabic_reshaper
+            from bidi.algorithm import get_display
+        except ImportError:
+            raise EngineError("Arabic rendering needs RAQM or the small local-video shaping dependencies") from None
+    def display(line):
+        return get_display(arabic_reshaper.reshape(line)) if fallback_arabic else line
     if transparent:
         image = Image.new("RGBA", (720, 1280), (0, 0, 0, 0))
     else:
         with Image.open(image_path) as source:
             image = ImageOps.fit(source.convert("RGB"), (720, 1280), method=Image.Resampling.LANCZOS)
     draw = ImageDraw.Draw(image)
-    rtl = {"direction": "rtl"} if language == "ar" else {}
+    rtl = {"direction": "rtl"} if language == "ar" and not fallback_arabic else {}
     font = ImageFont.truetype(font_path(language == "ar"), 34)
     small = ImageFont.truetype(font_path(language == "ar"), 26)
     lines = wrap_pixels(draw, title, font, 580, **rtl)
@@ -73,11 +80,11 @@ def caption_frame(image_path, title, lesson, language, destination, variant=0, *
     top = 180 if variant % 2 == 0 else 215
     draw.rounded_rectangle((42, top - 25, 668, top + 45 * len(lines) + 20), radius=16, fill=(25, 31, 31))
     for n, line in enumerate(lines):
-        draw.text((640 if language == "ar" else 66, top + n * 45), line, font=font, fill="#F8F3E8", anchor="ra" if language == "ar" else "la", **rtl)
+        draw.text((640 if language == "ar" else 66, top + n * 45), display(line), font=font, fill="#F8F3E8", anchor="ra" if language == "ar" else "la", **rtl)
     lower = 865
     draw.rounded_rectangle((42, lower - 25, 668, lower + 38 * len(lesson_lines) + 20), radius=16, fill=(25, 31, 31))
     for n, line in enumerate(lesson_lines):
-        draw.text((640 if language == "ar" else 66, lower + n * 38), line, font=small, fill="#F8F3E8", anchor="ra" if language == "ar" else "la", **rtl)
+        draw.text((640 if language == "ar" else 66, lower + n * 38), display(line), font=small, fill="#F8F3E8", anchor="ra" if language == "ar" else "la", **rtl)
     draw.text((66, 1080), "AI DESIGN CONCEPT", font=ImageFont.truetype(font_path(), 21), fill="white", stroke_width=1, stroke_fill="black")
     image.save(destination)
 

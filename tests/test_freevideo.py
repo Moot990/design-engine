@@ -7,7 +7,7 @@ from unittest.mock import Mock, patch
 
 from engine.common import ROOT, EngineError, config
 from engine.freevideo import Client, PREFIX, animate_selected
-from engine.media import media_executable, probe, render_short, run_media
+from engine.media import caption_frame, media_executable, probe, render_short, run_media
 from engine.providers import fixture_image
 
 
@@ -29,6 +29,13 @@ class FreeVideoTests(unittest.TestCase):
         with patch("engine.freevideo.Client") as client:
             self.assertEqual(animate_selected([self.image], self.settings, self.directory), ({}, []))
             client.assert_not_called()
+
+    def test_arabic_caption_without_raqm_uses_shaping_fallback(self):
+        output = ROOT / "output/qa/caption-ar-fallback.png"
+        output.parent.mkdir(parents=True, exist_ok=True)
+        with patch("engine.media.features.check", return_value=False):
+            caption_frame(self.image, "تصور لغرفة معيشة", "توازن الإضاءة والخامات", "ar", output)
+        self.assertTrue(output.is_file())
 
     def test_hosted_and_uncleared_publishing_fall_back_before_authentication(self):
         for env, publishing in (({"GITHUB_ACTIONS": "true"}, False), ({"GITHUB_ACTIONS": ""}, True)):

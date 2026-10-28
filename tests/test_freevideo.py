@@ -104,6 +104,47 @@ class FreeVideoTests(unittest.TestCase):
         self.assertTrue(video.is_file())
         self.assertFalse(any("assembly failed" in warning for warning in warnings))
 
+    def test_run_deadline_cancels_only_submitted_job(self):
+        client = Mock()
+        client.cancel.return_value = True
+        client.call.side_effect = [
+            {"ready": True, "features": {"generate.first_frame": True}, "queue": {}},
+            {"file": "first.jpg"}, {}, {"job": {"id": "j123456789abc"}},
+        ]
+        self.settings["freevideo"]["max_minutes_per_run"] = 1
+        with patch.dict("os.environ", {"GITHUB_ACTIONS": ""}), patch("engine.freevideo.Client", return_value=client), patch("engine.freevideo.gpu_sample", return_value=None), patch("engine.freevideo.time.monotonic", side_effect=[0, 61, 61]):
+            clips, warnings = animate_selected([self.image], self.settings, self.directory / "timeout", budget_path=self.directory / "budget.json")
+        self.assertFalse(clips)
+        self.assertIn("time limit", warnings[0])
+        client.cancel.assert_called_once_with("j123456789abc")
+
+    def test_success_obeys_clip_quota_and_cooldown(self):
+        client = Mock()
+        def call(method, path, body=None, **kwargs):
+            if kwargs.get("binary"):
+                return b"test-video-probe-is-mocked"
+            if path == PREFIX:
+                return {"ready": True, "features": {"generate.first_frame": True}, "queue": {}}
+            if path.endswith("/media"):
+                return {"file": "uploaded/first.jpg"}
+            if path.endswith("/plan"):
+                return {}
+            if path.endswith("/jobs"):
+                return {"job": {"id": "j123456789abc"}}
+            return {"status": "succeeded", "result": {"video": {"url": PREFIX + "/library/test/file"}}}
+        client.call.side_effect = call
+        self.settings["freevideo"].update(max_ai_clips_per_week=2, cooldown_seconds=30)
+        images = []
+        for number in range(3):
+            image = self.directory / f"quota-{number}.jpg"
+            fixture_image(image, number)
+            images.append(image)
+        with patch.dict("os.environ", {"GITHUB_ACTIONS": ""}), patch("engine.freevideo.Client", return_value=client), patch("engine.freevideo.gpu_sample", return_value=None), patch("engine.freevideo.time.sleep") as pause, patch("engine.media.probe", return_value={"format": {"duration": "5.2"}}):
+            clips, warnings = animate_selected(images, self.settings, self.directory / "quota", budget_path=self.directory / "budget.json")
+        self.assertEqual(set(clips), {0, 1})
+        self.assertEqual(warnings, [])
+        pause.assert_called_once_with(30)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

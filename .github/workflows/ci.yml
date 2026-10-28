@@ -1,0 +1,52 @@
+name: Cloud tests
+on:
+  push:
+    branches: [main]
+    paths-ignore: ['state/**', 'reports/**', 'docs/**', '*.md']
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test:
+    if: github.event.repository.private == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install cloud-only dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg fonts-noto-core poppler-utils
+          python -m pip install -r requirements.txt
+      - name: Syntax and behavioral tests
+        run: |
+          python -m compileall -q engine scripts tests
+          python -m unittest discover -s tests -v
+      - name: Render full sample daily batch (no credentials, no publishing)
+        run: python -m engine run --mode smoke --day 2026-10-29 --output output/smoke --state output/smoke-state
+      - name: Render sample digital products
+        run: |
+          python -m engine pack --images output/smoke/image-archive --output output/sample-pack --fixture
+          pdftoppm -f 1 -singlefile -scale-to 1200 -png output/sample-pack/mood-boards.pdf output/qa/mood-board
+          pdftoppm -f 1 -singlefile -scale-to 1200 -png output/sample-pack/palette-sheets.pdf output/qa/palette
+          pdftoppm -f 1 -singlefile -scale-to 1200 -png output/sample-pack/style-guide.pdf output/qa/guide
+      - name: Probe no-key access and live TTS (report availability separately)
+        run: python -m scripts.probe_services
+      - name: Test summary
+        if: always()
+        run: |
+          echo '## Cloud test scope' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Behavior tests, real ffmpeg rendering, Arabic/English captions, fixture PDFs. Sample images are NOT generated interiors and must not be published or sold.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Live publishing, Amazon attribution and real Gemini/Pollinations generation require your accounts and are NOT covered by a passing fixture test.' >> "$GITHUB_STEP_SUMMARY"
+          if test -f output/service-probes.json; then cat output/service-probes.json >> "$GITHUB_STEP_SUMMARY"; fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cloud-test-output
+          path: output/
+          retention-days: 7
+          if-no-files-found: warn

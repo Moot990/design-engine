@@ -15,7 +15,7 @@ from engine.ideas import candidates, ledger_row
 from engine.media import caption_frame
 from engine.pipeline import record_publication, short_copy, run as run_pipeline
 from engine.products import product_pack
-from engine.providers import fingerprint, fixture_image, is_duplicate, pin_text
+from engine.providers import fingerprint, fixture_image, is_duplicate, pin_text, image_account_ready
 from engine.publish import pinterest, pinterest_bearer, youtube
 
 
@@ -84,6 +84,22 @@ class EngineTests(unittest.TestCase):
         with patch("engine.common.requests.request", side_effect=[bad, good]) as call, patch("engine.common.time.sleep"):
             self.assertIs(request("GET", "https://example.test", service="test", retry_safe=True), good)
             self.assertEqual(call.call_count, 2)
+
+    def test_image_alias_and_earned_only_credit_bound(self):
+        model = {"name": "tongyi-mai/z-image-turbo", "aliases": ["zimage"], "paid_only": False, "community": False, "category": "image", "flat_rate": True, "pricing": {"currency": "pollen", "completionImageTokens": "0.004"}}
+        def reply(value):
+            result = Mock()
+            result.json.return_value = value
+            return result
+        with patch.dict("os.environ", {"POLLINATIONS_QUEST_ONLY": "true", "POLLINATIONS_API_KEY": "test-key"}):
+            with patch("engine.providers.request", side_effect=[reply({"balance": 1, "accountBalance": {"tier": 1, "paid": 0}}), reply([model])]):
+                self.assertEqual(image_account_ready(self.settings)["Authorization"], "Bearer test-key")
+            with patch("engine.providers.request", side_effect=[reply({"balance": .001, "accountBalance": {"tier": .001, "paid": 0}}), reply([model])]):
+                with self.assertRaises(EngineError):
+                    image_account_ready(self.settings)
+            with patch("engine.providers.request", return_value=reply({"balance": 10, "accountBalance": {"tier": 5, "paid": 5}})):
+                with self.assertRaises(EngineError):
+                    image_account_ready(self.settings)
 
     def test_outbox_persists_before_network_and_blocks_second_attempt(self):
         state = self.directory / "history.json"

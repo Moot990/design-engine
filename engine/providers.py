@@ -3,6 +3,7 @@ from __future__ import annotations
 import base64
 import io
 import json
+import math
 import os
 from pathlib import Path
 from urllib.parse import quote
@@ -36,14 +37,28 @@ def image_account_ready(settings):
     balance = response_json(request("GET", "https://gen.pollinations.ai/account/balance", service="Pollinations balance", retry_safe=True, headers=headers), "Pollinations balance")
     try:
         account = balance["accountBalance"]
-        if float(account["paid"]) != 0 or float(account["tier"]) <= 0 or float(balance["balance"]) <= 0:
+        tier, paid, key_balance = float(account["tier"]), float(account["paid"]), float(balance["balance"])
+        if not all(math.isfinite(v) for v in (tier, paid, key_balance)) or paid != 0 or tier <= 0 or key_balance <= 0:
             raise EngineError("Pollinations requires positive earned balance and zero paid balance; generation stopped")
     except (KeyError, TypeError, ValueError):
         raise EngineError("Pollinations balance cannot prove earned-only access; enable read-only account:usage on the key") from None
     models = response_json(request("GET", "https://gen.pollinations.ai/image/models", service="Pollinations models", retry_safe=True, headers=headers), "Pollinations models")
-    model = next((m for m in models if m.get("name") == settings["image_model"] or m.get("id") == settings["image_model"]), None)
-    if model is None or model.get("paid_only") is not False:
+    if not isinstance(models, list):
+        raise EngineError("Image model catalog format changed; generation stopped")
+    model = next((m for m in models if isinstance(m, dict) and (m.get("name") == settings["image_model"] or m.get("id") == settings["image_model"] or settings["image_model"] in m.get("aliases", []))), None)
+    if model is None or model.get("paid_only") is not False or model.get("community") is not False or model.get("category") != "image":
         raise EngineError("Selected image model is unavailable or not explicitly eligible for earned Pollen")
+    # Only a documented, single fixed per-image price can establish a useful
+    # pre-request credit bound. Do not guess token/resolution-dependent costs.
+    pricing = model.get("pricing", {})
+    try:
+        cost = float(pricing["completionImageTokens"])
+    except (KeyError, TypeError, ValueError):
+        raise EngineError("Image price is unknown; generation stopped") from None
+    if model.get("flat_rate") is not True or model.get("pricing_dimensions") or model.get("pricing_units") or set(pricing) != {"currency", "completionImageTokens"} or pricing["currency"] != "pollen" or not math.isfinite(cost) or cost < 0:
+        raise EngineError("Image model does not have an unambiguous fixed per-image price")
+    if min(tier, key_balance) < max(cost * 2, .001):
+        raise EngineError("Insufficient earned/key budget for the next image with safety margin")
     return headers
 
 

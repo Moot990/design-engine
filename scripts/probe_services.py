@@ -8,6 +8,12 @@ from engine.media import _voice, probe, render_short
 
 results = {"pollinations_no_key": "not tested", "edge_tts": "not tested", "gemini": "not tested: requires your free-tier key", "pinterest": "not tested: requires your approved app/token", "youtube": "not tested: requires your channel OAuth", "amazon_attribution": "not tested: requires your Associates account"}
 try:
+    models = response_json(request("GET", "https://gen.pollinations.ai/image/models", service="Pollinations public catalog", retry_safe=True), "Pollinations public catalog")
+    model = next((m for m in models if m.get("name") == config()["image_model"] or config()["image_model"] in m.get("aliases", [])), {})
+    results["image_model_catalog"] = {key: model.get(key) for key in ("name", "paid_only", "flat_rate", "pricing")}
+except EngineError as error:
+    results["image_model_catalog"] = str(error)
+try:
     request("GET", "https://gen.pollinations.ai/image/a%20minimal%20living%20room", service="Pollinations no-key probe", params={"width": 1000, "height": 1500})
     results["pollinations_no_key"] = "returned a response; terms still require a key; engine does not rely on no-key access"
 except EngineError as error:

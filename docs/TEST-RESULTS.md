@@ -33,6 +33,36 @@ on commit `bbb88d7`: **success**.
 
 ## Still needs your accounts
 
+## Final code verification
+
+[Run 40780001411](https://github.com/Moot990/design-engine/actions/runs/40780001411)
+on commit `5256d9b`: **success**. [Download its sample output](https://github.com/Moot990/design-engine/actions/runs/40780001411/artifacts/12856935580)
+before 4 November 2026.
+
+- **15 tests passed**, including the complete publishing control flow with mocked
+  providers, durable duplicate prevention, payload disclosure/private status,
+  token-rotation ordering and manifest publication IDs. Mocked API tests are not
+  evidence that your real accounts are authorized.
+- Live English and Saudi Arabic TTS both succeeded (3.792s / 5.592s probes).
+- A separate actual 24-second ffmpeg sample used live narration and contained an
+  audio stream, with no TTS fallback warning.
+- Four fixture images, bilingual overlays and all three PDF types rendered.
+- The live public model catalog resolved `zimage` to `tongyi-mai/z-image-turbo`;
+  fixed pricing and earned-credit eligibility metadata were checked. This does
+  not test authenticated generation or prove enough earned credits exist.
+- No-key Pollinations generation still returned HTTP 401.
+
+[Weekly report run 40779530564](https://github.com/Moot990/design-engine/actions/runs/40779530564):
+**success**, including an actual state/report commit to main (`4c13022`).
+
+[Setup preflight run 40779523339](https://github.com/Moot990/design-engine/actions/runs/40779523339):
+**blocked as expected**, exit 2, because `GEMINI_API_KEY`, `POLLINATIONS_API_KEY`,
+`AMAZON_ASSOCIATE_TAG`, `GEMINI_FREE_TIER_CONFIRMED` and
+`POLLINATIONS_QUEST_ONLY` are not configured. The readiness artifact and summary
+were uploaded. No generation or publishing was attempted by that run.
+
+## Still needs your accounts
+
 - Genuine Pollinations image generation and earned-balance/model compatibility.
 - Gemini text and AI visual review on real interiors.
 - Pinterest app approval, real Pin creation and actual OAuth/secret rotation.

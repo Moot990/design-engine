@@ -1,0 +1,119 @@
+name: Daily content engine
+on:
+  schedule:
+    - cron: '17 6 * * *' # Around 09:17 Saudi time; GitHub cron can be delayed.
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'preflight = setup check; generate = files; publish = selected APIs'
+        required: true
+        default: preflight
+        type: choice
+        options: [preflight, generate, publish]
+permissions:
+  contents: write
+  actions: read
+concurrency:
+  group: design-engine-state-main
+  cancel-in-progress: false
+jobs:
+  daily:
+    if: github.event.repository.private == false && github.ref == 'refs/heads/main' && (github.event_name == 'workflow_dispatch' || vars.ENGINE_ENABLED == 'true')
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      POLLINATIONS_API_KEY: ${{ secrets.POLLINATIONS_API_KEY }}
+      AMAZON_ASSOCIATE_TAG: ${{ secrets.AMAZON_ASSOCIATE_TAG }}
+      PINTEREST_ACCESS_TOKEN: ${{ secrets.PINTEREST_ACCESS_TOKEN }}
+      PINTEREST_BOARD_ID: ${{ secrets.PINTEREST_BOARD_ID }}
+      YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
+      YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+      YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+      GEMINI_FREE_TIER_CONFIRMED: ${{ vars.GEMINI_FREE_TIER_CONFIRMED }}
+      POLLINATIONS_QUEST_ONLY: ${{ vars.POLLINATIONS_QUEST_ONLY }}
+      PINTEREST_PUBLISH: ${{ vars.PINTEREST_PUBLISH }}
+      YOUTUBE_PUBLISH: ${{ vars.YOUTUBE_PUBLISH }}
+      PUBLISHING_REVIEWED: ${{ vars.PUBLISHING_REVIEWED }}
+      ENGINE_CHECKPOINT_PUSH: 'true'
+      GITHUB_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          fetch-depth: 1
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: '3.12'
+      - name: Install cloud-only dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg fonts-noto-core
+          python -m pip install -r requirements.txt
+      - name: Set up state commits
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+      - name: Check artifact budget
+        run: python -m scripts.storage_guard
+      - name: Select mode and Saudi date
+        id: selection
+        env:
+          REQUESTED_MODE: ${{ inputs.mode }}
+          AUTO_PUBLISH: ${{ vars.AUTO_PUBLISH }}
+        run: |
+          MODE="${REQUESTED_MODE:-generate}"
+          if [[ "$GITHUB_EVENT_NAME" == schedule && "$AUTO_PUBLISH" == true ]]; then MODE=publish; fi
+          echo "mode=$MODE" >> "$GITHUB_OUTPUT"
+          echo "day=$(TZ=Asia/Riyadh date +%F)" >> "$GITHUB_OUTPUT"
+      - name: Generate or publish daily batch
+        env:
+          RUN_MODE: ${{ steps.selection.outputs.mode }}
+        run: python -m engine run --mode "$RUN_MODE" --output output/daily
+      - name: Save state after interruption or failure
+        if: always()
+        run: |
+          git add state reports
+          if ! git diff --cached --quiet; then
+            git commit -m 'Save daily engine state [skip ci]'
+            git push origin HEAD:main
+          fi
+      - name: Enforce output size limits
+        if: always()
+        id: budget
+        run: |
+          python - <<'PY'
+          import os
+          from pathlib import Path
+          def size(path):
+              return sum(p.stat().st_size for p in Path(path).rglob('*') if p.is_file())
+          images = size('output/daily/image-archive')
+          total = size('output/daily')
+          ok = images <= 6_000_000 and total <= 14_000_000
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
+              f.write('allowed=' + str(ok).lower() + '\n')
+          print(f'Images {images} bytes; batch {total} bytes')
+          if not ok:
+              raise SystemExit('Artifact exceeds free storage budget; files are not uploaded')
+          PY
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always() && steps.budget.outputs.allowed == 'true'
+        with:
+          name: daily-batch-${{ steps.selection.outputs.day }}-${{ github.run_id }}
+          path: output/daily/
+          retention-days: 7
+          if-no-files-found: warn
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always() && steps.budget.outputs.allowed == 'true'
+        with:
+          name: image-archive-${{ steps.selection.outputs.day }}
+          path: output/daily/image-archive/
+          retention-days: 32
+          if-no-files-found: ignore
+      - name: Human-readable result
+        if: always()
+        run: |
+          echo '## Daily result' >> "$GITHUB_STEP_SUMMARY"
+          if test -f output/daily/readiness.json; then cat output/daily/readiness.json >> "$GITHUB_STEP_SUMMARY"; fi
+          if test -f output/daily/result.json; then cat output/daily/result.json >> "$GITHUB_STEP_SUMMARY"; fi
+          echo 'A failure may still include usable manual-upload files. Reconcile inflight/unknown uploads before retrying.' >> "$GITHUB_STEP_SUMMARY"

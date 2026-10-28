@@ -40,7 +40,18 @@ def main():
                 if not image.is_relative_to(Path(args.images).resolve()) or not image.is_file():
                     raise EngineError("Product source path is invalid")
                 entries.append({**value, "path": str(image)})
-            paths = product_pack(entries, args.output, fixture=args.fixture)
+            # Keep monthly packs curated and within the artifact storage budget.
+            entries.sort(key=lambda e: (e.get("date", ""), e.get("id", "")), reverse=True)
+            chosen, per_style = [], {}
+            for entry in entries:
+                style = entry.get("style", "")
+                if per_style.get(style, 0) >= 4:
+                    continue
+                chosen.append(entry)
+                per_style[style] = per_style.get(style, 0) + 1
+                if len(chosen) == 16:
+                    break
+            paths = product_pack(chosen, args.output, fixture=args.fixture)
             print("Created " + ", ".join(path.name for path in paths))
         else:
             Path(args.output).mkdir(parents=True, exist_ok=True)

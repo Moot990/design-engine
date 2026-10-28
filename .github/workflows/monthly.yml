@@ -1,0 +1,47 @@
+name: Monthly digital products
+on:
+  schedule:
+    - cron: '37 7 1 * *'
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  packs:
+    if: github.event.repository.private == false && github.ref == 'refs/heads/main' && (github.event_name == 'workflow_dispatch' || vars.ENGINE_ENABLED == 'true')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: '3.12'
+      - name: Install cloud-only PDF dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq fonts-noto-core poppler-utils
+          python -m pip install -r requirements.txt
+      - name: Check storage and collect previous-month image archives
+        run: |
+          python -m scripts.storage_guard
+          python -m scripts.collect_month
+      - name: Make reviewable monthly products
+        run: |
+          python -m engine pack --images output/monthly-sources --output output/monthly-pack
+          pdftoppm -f 1 -singlefile -scale-to 1200 -png output/monthly-pack/mood-boards.pdf output/monthly-pack/preview
+          python - <<'PY'
+          from pathlib import Path
+          total = sum(p.stat().st_size for p in Path('output/monthly-pack').rglob('*') if p.is_file())
+          if total > 40_000_000:
+              raise SystemExit('Monthly pack exceeds the free artifact size budget')
+          PY
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: monthly-product-pack-${{ github.run_id }}
+          path: output/monthly-pack/
+          retention-days: 7
+          if-no-files-found: error
+      - name: Result
+        run: echo 'Download the draft pack within 7 days. Review all pages, AI disclosure and current marketplace rules before listing. The engine does not set prices or upload products to a store.' >> "$GITHUB_STEP_SUMMARY"

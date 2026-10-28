@@ -62,7 +62,8 @@ class EngineTests(unittest.TestCase):
     def test_duplicate_image_rejected_even_when_reencoded(self):
         first, second = self.directory / "one.jpg", self.directory / "two.jpg"
         fixture_image(first, 1)
-        Image.open(first).save(second, quality=72)
+        with Image.open(first) as original:
+            original.save(second, quality=72)
         hash_ = fingerprint(first)
         self.assertTrue(is_duplicate(fingerprint(second), {hash_: {}}))
         flat = self.directory / "flat.jpg"
@@ -118,7 +119,8 @@ class EngineTests(unittest.TestCase):
         for language, title, lesson in (("ar", "غرفة معيشة هادئة", "توازن الخامات والإضاءة"), ("en", "A calmer living room", "Balance texture and lighting")):
             output = target / f"caption-{language}.png"
             caption_frame(source, title, lesson, language, output)
-            self.assertEqual(Image.open(output).size, (720, 1280))
+            with Image.open(output) as rendered:
+                self.assertEqual(rendered.size, (720, 1280))
 
     def test_product_pack_and_fixture_sale_guard(self):
         image = self.directory / "source.jpg"

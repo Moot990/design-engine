@@ -23,6 +23,8 @@ def readiness(settings, publishing=False):
         if os.environ.get(flag) != "true":
             missing.append(flag + "=true (repository variable)")
     if publishing:
+        if not any(os.environ.get(p + "_PUBLISH") == "true" for p in ("PINTEREST", "YOUTUBE")):
+            missing.append("Enable PINTEREST_PUBLISH or YOUTUBE_PUBLISH after platform setup")
         for platform, names in (("PINTEREST", ["PINTEREST_ACCESS_TOKEN", "PINTEREST_BOARD_ID"]), ("YOUTUBE", ["YOUTUBE_CLIENT_ID", "YOUTUBE_CLIENT_SECRET", "YOUTUBE_REFRESH_TOKEN"])):
             if os.environ.get(platform + "_PUBLISH") == "true":
                 missing.extend(name for name in names if not os.environ.get(name))
@@ -150,6 +152,9 @@ def run(settings, mode, day, output, state_dir):
                 copy = short_copy(settings, scenes, language, fixture)
                 video, media_warnings = render_short([a["image"] for a in scenes], copy, settings, language, output / "video", fixture=fixture, variant=date.fromisoformat(day).toordinal())
                 warnings.extend(media_warnings)
+                if not fixture:
+                    for frame in (output / "video").glob("frame-*.png"):
+                        frame.unlink()
                 description = f"{DISCLOSURE}\n{AI_NOTICE}\n{copy['script']}\n\nSimilar-item inspiration:\n" + "\n".join(a["link"] for a in scenes) + "\nProduct links are not clickable in Shorts descriptions; use the channel profile. #Shorts"
                 short_meta = {"video_file": "video/short.mp4", "title": copy["hook"], "description": description, "language": language, "privacy": settings["youtube_privacy"], "contains_synthetic_media": True, "status": "fixture" if fixture else "ready-for-manual-upload"}
                 write_csv(output / "youtube-upload-manifest.csv", [short_meta], list(short_meta))

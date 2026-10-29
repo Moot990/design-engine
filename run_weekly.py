@@ -53,7 +53,7 @@ def main():
         metadata["description"] += "\nAI video animation: MiniMax H3 via FreeVideo."
     metadata.update(video_file="video/short.mp4", status="fixture" if fixture else "local-preview-only" if args.local_preview else "ready-for-manual-review", contains_synthetic_media=True)
     write_csv(output / "youtube-upload-manifest.csv", [metadata], list(metadata))
-    save_json(output / "weekly-result.json", {"video": str(video), "requested_backend": settings.get("video_backend", "ffmpeg"), "ai_clips_used": report.get("used_ai_clips", 0), "warnings": warnings, "fixture": fixture, "local_preview_only": args.local_preview, "publication_cleared": not used_ai or report.get("publication_cleared") is True})
+    save_json(output / "weekly-result.json", {"video": str(video), "requested_backend": settings.get("video_backend", "ffmpeg"), "ai_clips_used": report.get("used_ai_clips", 0), "warnings": warnings, "fixture": fixture, "local_preview_only": args.local_preview, "publication_cleared": not fixture and not args.local_preview and (not used_ai or report.get("publication_cleared") is True)})
     (output / "UPLOAD-REMINDER.txt").write_text("Review before publishing. In YouTube Studio > Details > Altered content select Yes for realistic AI interiors. Descriptions include AI disclosure. Local-preview and fixture videos must not be uploaded. No platform upload was performed.\n", encoding="utf-8")
     print(json.dumps({"video": str(video), "warnings": warnings, "ai_clips_used": report.get("used_ai_clips", 0)}))
 

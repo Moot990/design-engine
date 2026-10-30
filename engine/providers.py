@@ -131,8 +131,11 @@ def pin_text(settings, idea, fixture=False):
     language = idea["language"]
     if fixture:
         value = dict(title=f"TEST {idea['style']['en']} living room", description="Synthetic fixture for cloud tests only.", hashtags=["#InteriorDesign"], script="Test one design detail. Compare a smooth surface with a woven texture and check the room proportions before buying.")
+        if language == "ar":
+            value.update(title=f"اختبار: غرفة معيشة بطابع {idea['style']['ar']}", description="عينة اختبار فقط: راجع المقاسات وسيب مساحة للحركة قبل اختيار الأثاث.", script="جرّب تنسيق الخامات بهدوء، وقارن مقاسات الأثاث بمساحة الغرفة قبل الشراء. سيب طريق واضح للحركة وضيف إضاءة جانبية مريحة للمساء. الصور دي عينات اختبار وليست تصميمات حقيقية أو منتجات مطابقة.", hashtags=["#ديكور", "#غرفة_المعيشة"])
     else:
         value = gemini(settings, (
+            f"Audience: {settings.get('audience', 'Egypt and the Arab world')}. When writing Arabic, use natural, simple Arabic with light Egyptian phrasing, understandable across the Arab world; avoid stiff translations. English is secondary. "
             f"Write original residential interior design content in {'Arabic' if language == 'ar' else 'English'}. "
             f"Concept: {idea['style']['en']} {idea['room']['en']}, {idea['palette']['en']}, "
             f"{idea['item']['en']}. Teaching point: {idea['format']['tip']}. "

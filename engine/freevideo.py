@@ -162,7 +162,7 @@ def animate_selected(images, settings, directory, *, publishing=False, budget_pa
             raise EngineError("FreeVideo queue is busy; using ffmpeg without interrupting another job")
         with budget_lock(state_path):
             history = json.loads(state_path.read_text(encoding="utf-8")) if state_path.exists() else {"weeks": {}, "attempts": []}
-            calendar = datetime.now(ZoneInfo(settings.get("timezone", "Asia/Riyadh"))).isocalendar()
+            calendar = datetime.now(ZoneInfo(settings.get("timezone", "Africa/Cairo"))).isocalendar()
             week = f"{calendar.year}-W{calendar.week:02}"
             available = max(0, limits["max_ai_clips_per_week"] - history["weeks"].get(week, 0))
             if not available:

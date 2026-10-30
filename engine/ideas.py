@@ -22,7 +22,7 @@ def candidates(settings, day, previous, count=None):
         if len(selected) < min(count, len(settings["styles"]), len(settings["palettes"]), len(settings["items"]), len(settings["formats"])):
             if any(any(idea[k]["id"] == part["id"] for k, part in (("style", style), ("palette", palette), ("item", item), ("format", format_))) for idea in selected):
                 continue
-        language = "ar" if (int(day.replace("-", "")) + len(selected)) % 2 else "en"
+        language = settings.get("secondary_language", "en") if (len(selected) + 1) % settings.get("secondary_every_n", 4) == 0 else settings.get("primary_language", "ar")
         selected.append(dict(id=idea_id, room=room, style=style, palette=palette, item=item, format=format_, language=language))
         if len(selected) == count:
             return selected

@@ -45,7 +45,7 @@ before 4 November 2026.
   providers, durable duplicate prevention, payload disclosure/private status,
   token-rotation ordering and manifest publication IDs. Mocked API tests are not
   evidence that your real accounts are authorized.
-- Live English and Saudi Arabic TTS both succeeded (3.792s / 5.592s probes).
+- Live English and then-configured ar-SA Arabic TTS (historical run) both succeeded (3.792s / 5.592s probes).
 - A separate actual 24-second ffmpeg sample used live narration and contained an
   audio stream, with no TTS fallback warning.
 - Four fixture images, bilingual overlays and all three PDF types rendered.

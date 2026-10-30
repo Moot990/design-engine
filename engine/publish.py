@@ -41,8 +41,8 @@ def pinterest_bearer():
     return value["access_token"]
 
 
-def pinterest(image, title, description, link, board_id):
-    if len(title) >= 100 or len(description) > 800 or not validate_affiliate_url(link):
+def pinterest(image, title, description, link, board_id, program=None):
+    if len(title) >= 100 or len(description) > 800 or not validate_affiliate_url(link, program):
         raise EngineError("Pinterest payload validation failed")
     if not re.fullmatch(r"\d+", board_id):
         raise EngineError("Pinterest board ID must be numeric")

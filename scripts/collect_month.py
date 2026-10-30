@@ -1,4 +1,4 @@
-"""Fetch only bounded, genuine daily image archives for the previous Saudi month."""
+"""Fetch only bounded, genuine daily image archives for the previous Egypt month."""
 import io
 import os
 import re
@@ -11,7 +11,7 @@ from engine.common import EngineError, request, response_json, secret
 
 
 def main():
-    month = (datetime.now(ZoneInfo("Asia/Riyadh")).date().replace(day=1) - timedelta(days=1)).strftime("%Y-%m")
+    month = (datetime.now(ZoneInfo("Africa/Cairo")).date().replace(day=1) - timedelta(days=1)).strftime("%Y-%m")
     repository = os.environ["GITHUB_REPOSITORY"]
     headers = {"Authorization": "Bearer " + secret("GITHUB_TOKEN"), "Accept": "application/vnd.github+json"}
     base = f"https://api.github.com/repos/{repository}/actions/artifacts"

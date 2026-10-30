@@ -1,7 +1,7 @@
 # Design Engine
 
-Arabic/English residential interior content: start with living rooms, export
-Pinterest Pins and faceless Shorts, add Saudi affiliate links, and prepare monthly
+Residential interior content for Egypt and the Arab world, Arabic first and English secondary: start with living rooms, export
+Pinterest Pins and faceless Shorts, add Amazon Egypt affiliate links, and prepare monthly
 digital product drafts. Python 3.12. All media processing runs in the cloud.
 
 **Current status:** code deployed; fixture cloud tests pass. Real AI generation,
@@ -24,7 +24,7 @@ See [current service/terms findings](docs/SERVICE-STATUS.md),
    check geometry, visible featured furniture and design quality. AI checks can
    miss defects; your weekly review is still necessary.
 4. Writes original SEO text with bilingual affiliate/AI disclosure. Links use a
-   recently reviewed `data/products.csv` ASIN or a tagged Amazon.sa search.
+   recently reviewed `data/products.csv` Amazon.eg product URL/ASIN or a tagged Amazon.eg search.
    Everything is labelled similar-item inspiration; no prices or exact-match claims.
 5. Exports 4 Pins/day by default (configurable 3-10) and a 24-second 720x1280 Short
    using 4-6 accepted images, varied framing, teaching points, hooks and voices.
@@ -38,6 +38,21 @@ See [current service/terms findings](docs/SERVICE-STATUS.md),
 8. Commits sanitized state/reports to `main`. A durable outbox checkpoint precedes
    each publish request. An ambiguous upload is marked unknown and not auto-retried.
 
+## Egypt and language defaults
+
+`AFFILIATE_PROGRAM: amazon.eg` in `config/engine.yaml` is the default; the optional
+GitHub Actions repository variable `AFFILIATE_PROGRAM` overrides it. Supported
+values are `amazon.eg`, `amazon.com`, `amazon.ae`; other accounts require their
+own approved tracking ID and a separate terms review. No tracking suffix is assumed.
+Leave the variable unset for Egypt. `AMAZON_ASSOCIATE_TAG` remains a GitHub Secret.
+The CSV expects canonical `https://www.amazon.eg/dp/ASIN` product URLs; use links
+from your Egypt account, not a shortener. Do not commit tagged exports.
+
+The default daily mix is three Arabic Pins and one English Pin, with Arabic
+Shorts and Egyptian Arabic voices. Prompts request simple, natural Arabic for
+Egypt and the wider Arab world. `primary_language`, `secondary_language` and
+`secondary_every_n` remain configurable. Dates/budgets use `Africa/Cairo`.
+
 ## Workflow buttons
 
 Open [Actions](https://github.com/Moot990/design-engine/actions).
@@ -46,13 +61,13 @@ Open [Actions](https://github.com/Moot990/design-engine/actions).
 |---|---|---|
 | Cloud tests | Behavior tests, synthetic batch, actual ffmpeg/PDF render, service probes | None |
 | Daily content engine / preflight | List missing setup | None; missing setup deliberately fails |
-| Daily content engine / generate | One development integration batch; export files | Gemini, earned Pollinations, Saudi tag |
+| Daily content engine / generate | One development integration batch; export files | Gemini, earned Pollinations, Egypt tag |
 | Daily content engine / publish | Batch plus enabled platform uploads | Generation credentials + selected platform credentials + production-use confirmation |
 | Weekly review | Commit report and day-90 template | Built-in workflow token |
 | Monthly digital products | Build draft packs from previous-month source archives | Built-in workflow token |
 
-Daily cron is around 09:17 Saudi time. Weekly review is Friday around 10:43.
-Monthly products run on the first around 10:37. GitHub schedules can be late and
+Daily cron is 06:17 UTC; weekly review is Friday at 07:43 UTC.
+Monthly products run on the first at 07:37 UTC. Cairo local time varies with DST. GitHub schedules can be late and
 public-repository schedules can disable after 60 days without activity. All cron
 jobs require both `ENGINE_ENABLED=true` and `ACTIONS_PRODUCTION_APPROVED=true`.
 
@@ -92,7 +107,7 @@ Edit YAML/CSV with GitHub's pencil button, then Commit changes to `main`.
 Use clear messages. A new room can be added to `rooms` after reviewing the living
 room series. Do not delete history to obtain more daily content.
 
-Only one real batch per Saudi date is reserved. Re-running the same date stops
+Only one real batch per Egypt date is reserved. Re-running the same date stops
 instead of issuing duplicate posts or generation requests. If a batch failed,
 download its partial output and inspect state first. Do not reset an unknown
 publication until you have checked the actual Pinterest board/YouTube Studio.

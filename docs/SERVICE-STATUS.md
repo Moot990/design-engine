@@ -1,4 +1,4 @@
-# Service and terms check - 29 October 2026
+# Service and terms check — Egypt correction, 30 October 2026
 
 These findings change the original brief. They are not a promise of free,
 uninterrupted production access or revenue.
@@ -62,20 +62,26 @@ alone does not guarantee originality, YPP eligibility, views or ad revenue.
 normally expire after 7 days with the upload scope. Production publishing status,
 OAuth verification and YouTube API/account reviews are separate matters.
 
-## Amazon.sa
+## Amazon Egypt — rechecked 30 October 2026
 
-Use the [Saudi Associates agreement](https://affiliate-program.amazon.sa/help/operating/agreement)
-and [Saudi program policies](https://affiliate-program.amazon.sa/help/operating/policies)
-shown in your account. Declare your actual social channels, disclose affiliate
-links, verify that your particular social placements and search links are allowed,
-and check your tracking tag in Associates reporting.
+The [Egypt agreement](https://affiliate-program.amazon.eg/help/operating/agreement)
+permits monetizing social content through properly tagged links. It requires the
+Amazon Associate disclosure prominently on your site/profile. Keep that statement
+in the profile and clear Arabic/English ad disclosure beside each link/post.
 
-The [old PA-API locale list](https://webservices.amazon.eu/paapi5/documentation/common-request-parameters.html)
-listed Saudi Arabia, so 'Saudi is unsupported' is not a valid assumption.
-[Amazon's documentation now redirects to its PA-API deprecation/Creators API notice](https://affiliate-program.amazon.com/creatorsapi/docs/en-us/paapiv5-deprecation).
-This engine does not depend on PA-API or scrape Amazon. It uses your manually
-reviewed ASINs or tagged search URLs. Search links and generated furniture are
-clearly described as similar-item inspiration, without prices or availability claims.
+The [Egypt policies](https://affiliate-program.amazon.eg/help/operating/policies)
+require public original content, registered channel URLs and accurate account
+information. No misleading product matches, self-purchases or purchase incentives.
+Do not cloak the destination, copy unlicensed Amazon product media or invent prices.
+The public Egypt pages reviewed do not establish blanket Pinterest eligibility;
+confirm that exact profile and placement in your Egypt account or with support.
+YouTube Shorts description URLs are not clickable; use a registered channel profile.
+
+This engine uses manually reviewed canonical Amazon.eg product URLs/ASINs or
+search inspiration. It does not scrape Amazon, fetch product media or depend on
+PA-API. Compare generated tagged links with Egypt SiteStripe before real use;
+link generation is not proof of commission tracking. Changing AFFILIATE_PROGRAM
+requires the matching account and a fresh terms review. No sales were tested.
 
 ## GitHub Actions
 
@@ -101,7 +107,7 @@ keeps captions-only output, marked for review. No copyrighted music is used.
 
 [Gumroad has no monthly fee](https://gumroad.com/help/article/66-gumroads-fees), but
 fees are deducted from sales. Zero subscriptions does not mean fee-free selling.
-Confirm [Saudi payout availability and verification](https://gumroad.com/help/article/13-getting-paid)
+Confirm [Egypt payout availability and verification](https://gumroad.com/help/article/13-getting-paid)
 in your own account. Etsy listing/payment fees conflict with a strict zero-upfront
 budget, so Etsy is not provisioned. No store account, price or product listing is
 created automatically. These steps require your identity, payout details and review.

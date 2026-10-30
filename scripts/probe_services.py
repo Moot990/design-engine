@@ -28,8 +28,12 @@ try:
     video, warnings = render_short(sources, copy, config(), "en", "output/voiced-test", fixture=False)
     results["narrated_fixture_short"] = {"has_audio": any(s["codec_type"] == "audio" for s in probe(video)["streams"]), "warnings": warnings}
     arabic = Path("output/qa/tts-probe-ar.mp3")
-    asyncio.run(_voice("اختبر توازن الخامات والإضاءة قبل اختيار أثاث غرفة المعيشة.", "ar-SA-ZariyahNeural", arabic))
+    asyncio.run(_voice("اختبر توازن الخامات والإضاءة قبل اختيار أثاث غرفة المعيشة.", "ar-EG-SalmaNeural", arabic))
     results["arabic_edge_tts"] = {"status": "live synthesis succeeded", "seconds": float(probe(arabic)["format"]["duration"])}
+    arabic_copy = json.loads(Path("output/smoke/short-copy.json").read_text(encoding="utf-8"))
+    video_ar, warnings_ar = render_short(sources, arabic_copy, config(), "ar", "output/voiced-ar-test", fixture=False)
+    results["arabic_narrated_fixture_short"] = {"has_audio": any(s["codec_type"] == "audio" for s in probe(video_ar)["streams"]), "warnings": warnings_ar, "voice": config()["voices"]["ar"][0]}
+
 except EngineError as error:
     results["edge_tts"] = str(error)
 save_json("output/service-probes.json", results)

@@ -1,7 +1,7 @@
 name: Daily content engine
 on:
   schedule:
-    - cron: '17 6 * * *' # Around 09:17 Saudi time; GitHub cron can be delayed.
+    - cron: '17 6 * * *' # 06:17 UTC; Cairo local time varies with DST; GitHub cron can be delayed.
   workflow_dispatch:
     inputs:
       mode:
@@ -24,6 +24,7 @@ jobs:
     env:
       GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
       POLLINATIONS_API_KEY: ${{ secrets.POLLINATIONS_API_KEY }}
+      AFFILIATE_PROGRAM: ${{ vars.AFFILIATE_PROGRAM }}
       AMAZON_ASSOCIATE_TAG: ${{ secrets.AMAZON_ASSOCIATE_TAG }}
       PINTEREST_ACCESS_TOKEN: ${{ secrets.PINTEREST_ACCESS_TOKEN }}
       PINTEREST_BOARD_ID: ${{ secrets.PINTEREST_BOARD_ID }}
@@ -61,7 +62,7 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
       - name: Check artifact budget
         run: python -m scripts.storage_guard
-      - name: Select mode and Saudi date
+      - name: Select mode and Egypt date
         id: selection
         env:
           REQUESTED_MODE: ${{ inputs.mode }}
@@ -70,7 +71,7 @@ jobs:
           MODE="${REQUESTED_MODE:-generate}"
           if [[ "$GITHUB_EVENT_NAME" == schedule && "$AUTO_PUBLISH" == true ]]; then MODE=publish; fi
           echo "mode=$MODE" >> "$GITHUB_OUTPUT"
-          echo "day=$(TZ=Asia/Riyadh date +%F)" >> "$GITHUB_OUTPUT"
+          echo "day=$(TZ=Africa/Cairo date +%F)" >> "$GITHUB_OUTPUT"
       - name: Generate or publish daily batch
         env:
           RUN_MODE: ${{ steps.selection.outputs.mode }}

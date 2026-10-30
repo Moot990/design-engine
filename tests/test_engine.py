@@ -40,20 +40,48 @@ class EngineTests(unittest.TestCase):
                 seen.add(idea["id"])
                 prior.append(ledger_row(idea, f"2026-10-{day:02}", "reserved"))
 
-    def test_product_links_sa_tag_and_stale_product_fallback(self):
+    def test_egypt_product_url_retags_and_stale_product_falls_back(self):
         idea = candidates(self.settings, "2026-10-29", [])[0]
         path = self.directory / "products.csv"
-        fields = ["item_id", "style_id", "asin", "search_query", "label_en", "label_ar", "active", "reviewed_on"]
+        fields = ["item_id", "style_id", "product_url", "asin", "search_query", "label_en", "label_ar", "active", "reviewed_on"]
         row = dict.fromkeys(fields, "")
-        row.update(item_id=idea["item"]["id"], asin="B012345678", active="true", reviewed_on="2026-10-29")
+        row.update(item_id=idea["item"]["id"], product_url="https://amazon.eg/gp/product/B012345678?tag=old-id&ref=old", active="true", reviewed_on="2026-10-29")
         write_csv(path, [row], fields)
-        link = affiliate_link(idea, "test-21", path, date(2026, 10, 29))
-        self.assertIn("/dp/B012345678?tag=test-21", link)
+        link = affiliate_link(idea, "egypt-account-id", path, date(2026, 10, 29))
+        self.assertEqual(link, "https://www.amazon.eg/dp/B012345678?tag=egypt-account-id")
         self.assertTrue(validate_affiliate_url(link))
-        self.assertIn("/s?", affiliate_link(idea, "test-21", path, date(2026, 11, 20)))
-        self.assertFalse(validate_affiliate_url("https://www.amazon.sa.attacker.test/?tag=test-21"))
+        self.assertIn("https://www.amazon.eg/s?", affiliate_link(idea, "egypt-account-id", path, date(2026, 11, 20)))
+        row["product_url"] = "https://www.amazon.com/dp/B012345678"
+        write_csv(path, [row], fields)
         with self.assertRaises(EngineError):
-            affiliate_link(idea, "wrong-20", path)
+            affiliate_link(idea, "egypt-account-id", path, date(2026, 10, 29))
+        with self.assertRaises(EngineError):
+            affiliate_link(idea, "invalid&tag", path)
+
+    def test_affiliate_market_override_and_url_safety(self):
+        from engine.affiliate import affiliate_program
+        with patch.dict("os.environ", {"AFFILIATE_PROGRAM": "amazon.com"}):
+            self.assertEqual(affiliate_program("amazon.eg"), "amazon.com")
+            self.assertTrue(validate_affiliate_url("https://www.amazon.com/dp/B012345678?tag=test-id"))
+            self.assertFalse(validate_affiliate_url("https://www.amazon.eg/dp/B012345678?tag=test-id"))
+        with patch.dict("os.environ", {"AFFILIATE_PROGRAM": ""}):
+            self.assertEqual(affiliate_program(self.settings["AFFILIATE_PROGRAM"]), "amazon.eg")
+            for url in ["https://www.amazon.eg.attacker.test/s?k=lamp&tag=id", "https://user@www.amazon.eg/s?k=lamp&tag=id", "https://www.amazon.eg:bad/s?k=lamp&tag=id", "https://www.amazon.eg/s?k=lamp&tag=a&tag=b", "http://www.amazon.eg/s?k=lamp&tag=id"]:
+                self.assertFalse(validate_affiliate_url(url), url)
+        with patch.dict("os.environ", {"AFFILIATE_PROGRAM": "attacker.test"}):
+            with self.assertRaises(EngineError):
+                affiliate_program()
+
+    def test_arabic_first_mix_and_fixture_narration(self):
+        batch = candidates(self.settings, "2026-10-29", [])
+        self.assertEqual([idea["language"] for idea in batch], ["ar", "ar", "ar", "en"])
+        self.assertEqual(self.settings["primary_language"], "ar")
+        self.assertEqual(self.settings["timezone"], "Africa/Cairo")
+        copy = pin_text(self.settings, batch[0], fixture=True)
+        self.assertIn("اختبار", copy["title"])
+        self.assertIn(DISCLOSURE, copy["description"])
+        short = short_copy(self.settings, [{"idea": idea} for idea in batch], "ar", fixture=True)
+        self.assertIn("راجع", short["script"])
 
     def test_csv_formula_injection_is_neutralized(self):
         path = self.directory / "export.csv"
@@ -155,7 +183,7 @@ class EngineTests(unittest.TestCase):
         reply = Mock()
         reply.json.return_value = {"id": "12345"}
         with patch("engine.publish.request", return_value=reply) as call, patch("engine.publish.pinterest_bearer", return_value="test-only"):
-            self.assertEqual(pinterest(image, "A useful room idea", DISCLOSURE, "https://www.amazon.sa/s?k=lamp&tag=test-21", "1234"), "12345")
+            self.assertEqual(pinterest(image, "A useful room idea", DISCLOSURE, "https://www.amazon.eg/s?k=lamp&tag=test-21", "1234"), "12345")
             payload = call.call_args.kwargs["json"]
             self.assertEqual(payload["media_source"]["source_type"], "image_base64")
             self.assertIn("#ad", payload["description"])

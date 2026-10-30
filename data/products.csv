@@ -1,3 +1,3 @@
-item_id,style_id,asin,search_query,label_en,label_ar,active,reviewed_on
-sofa,,,linen sofa,Linen sofa inspiration,إلهام لأريكة كتانية,false,
-lamp,,,floor lamp,Floor lamp inspiration,إلهام لمصباح أرضي,false,
+item_id,style_id,product_url,asin,search_query,label_en,label_ar,active,reviewed_on
+sofa,,,,كنبة كتانية,Linen sofa inspiration,إلهام لكنبة كتانية,false,
+lamp,,,,مصباح أرضي,Floor lamp inspiration,إلهام لمصباح أرضي,false,

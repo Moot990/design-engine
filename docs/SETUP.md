@@ -37,7 +37,7 @@ and one-off development integration tests are available meanwhile.
    styling lessons. Add the bilingual affiliate disclosure from the README/code
    to your profile or a clearly linked disclosure page.
 4. Create the YouTube channel in step 4, then register both complete profile URLs
-   in your Saudi Associates site list (step 6) before affiliate publishing.
+   in your Egypt Associates site list (step 6) before affiliate publishing.
 5. In [Pinterest Developers > My apps](https://developers.pinterest.com/apps/),
    choose Create app. Enter accurate purpose/contact details and the requested
    website/privacy-policy details. Do not invent a business or claim endorsement.
@@ -95,7 +95,7 @@ This optional OAuth setup has not been live-tested on your account.
    disclosure. Complete the channel's verification/feature checks as requested.
 2. Add a relevant disclosed affiliate/store destination under channel profile
    Links. Shorts description URLs are not clickable. Initially one relevant
-   Amazon.sa search or your approved Associates page is more honest than a
+   Amazon.eg search or your approved Associates page is more honest than a
    claim that the profile contains every exact product in every design.
 3. Open [Google Cloud Console](https://console.cloud.google.com/) > project
    selector > New project. Name it Design Engine Uploads. Do not enable billing.
@@ -148,25 +148,42 @@ spending budget, and read-only `account:usage` for balance checking. Store it as
 earned credits and zero paid balance. Check the live model catalog; update
 `image_model` in the YAML if `zimage` is not available on your account.
 
-## 6. Sign up for Amazon.sa Associates
+## 6. Sign up for Amazon.eg Associates
 
-1. Open [Saudi Associates](https://affiliate-program.amazon.sa/) > Sign up.
+1. Open [Egypt Associates](https://affiliate-program.amazon.eg/) > Sign up.
    Sign in, then enter your own accurate identity, contact and payout/tax details.
 2. In the websites/mobile-app list enter your actual Pinterest profile URL and
    YouTube channel URL. Describe the original design content truthfully.
-3. Read the Saudi agreement and confirm those social placements, direct product
+3. Read the Egypt agreement and confirm those social placements, direct product
    links and tagged search links are allowed for your account. Complete any
    application/review requirements shown there.
-4. Copy your approved Saudi tracking tag ending in `-21` directly into GitHub
+4. Copy your approved Amazon Egypt tracking ID exactly as shown in your account directly into GitHub
    Secret `AMAZON_ASSOCIATE_TAG`. Do not invent an approved tag.
 5. Put the required Associate identification on your social profiles and retain
    the bilingual #ad disclosure near every published affiliate link.
-6. Each week open a few products manually on Amazon.sa. Add the 10-character
-   ASIN (from `/dp/ASIN`) to `data/products.csv`, set the matching item/style,
+6. Each week open a few products manually on Amazon.eg. Add the canonical
+   `/dp/ASIN` product link in `data/products.csv` under `product_url` (or the
+   10-character ASIN), set the matching item/style,
    `active=true`, and `reviewed_on=YYYY-MM-DD`. No scraping and no prices.
    Rows older than 14 days are ignored; search inspiration is the fallback.
 7. Check actual clicks/earnings in Associates reporting after publication.
    A correctly formatted link alone does not prove approved attribution.
+
+### Egypt defaults to verify before the first real export
+
+- In `config/engine.yaml`, keep `AFFILIATE_PROGRAM: amazon.eg`; optionally set the
+  same named Actions variable. A blank/unset variable uses the YAML default.
+- Keep your actual Egypt tracking ID in `AMAZON_ASSOCIATE_TAG` only. Copy it exactly;
+  the engine makes no assumption about the suffix. Never commit your tag or exports.
+- Add each public social profile to your Associates site list. Confirm Pinterest
+  eligibility/placements with Egypt Associates if the account does not confirm them.
+- Use canonical Amazon.eg product links in `data/products.csv` under `product_url`.
+  Compare exported links with SiteStripe; this is not an attribution test.
+- Keep the Amazon Associate statement prominently on profiles and disclosure near
+  links. Prompts use simple Arabic for Egypt/Arab audiences; English is secondary.
+- Use `Africa/Cairo`, Egyptian Arabic voices and the default 3:1 Arabic/English Pin
+  mix. Shorts default to Arabic. Review real phrasing before any upload.
+- Leave publishing/schedules off and FreeVideo `publication_cleared: false`.
 
 ## 7. Add the exact GitHub Secrets and variables
 
@@ -177,7 +194,7 @@ For each: **New repository secret > Name > Secret > Add secret**.
 |---|---|
 | `GEMINI_API_KEY` | Live text and visual review |
 | `POLLINATIONS_API_KEY` | Earned-only live image generation |
-| `AMAZON_ASSOCIATE_TAG` | Saudi affiliate export/publication |
+| `AMAZON_ASSOCIATE_TAG` | Egypt affiliate export/publication |
 | `PINTEREST_BOARD_ID` | Pinterest API destination |
 | `PINTEREST_ACCESS_TOKEN` | Simple Pinterest API authorization |
 | `PINTEREST_CLIENT_ID` | Optional continuous Pinterest OAuth |
@@ -223,7 +240,7 @@ checkpoint deliberately stops publishing.
 4. Review all images, Arabic/English text, suggested destinations, narration,
    video pacing and disclosures. Reject distorted or repetitive work.
 5. After production-use confirmation and personal approval, set only the platform
-   publishing flag(s) you need. On the next Saudi date run **publish**, initially
+   publishing flag(s) you need. On the next Egypt date run **publish**, initially
    with private YouTube output. Verify actual platform IDs and Studio/board output.
 6. Only then enable `ENGINE_ENABLED` and `AUTO_PUBLISH` if wanted. A same-date rerun
    is deliberately blocked to avoid duplicates. A failed upload with unknown
@@ -232,7 +249,7 @@ checkpoint deliberately stops publishing.
 ## 9. Create Gumroad account and upload products later
 
 Open [Gumroad](https://gumroad.com/) > Start selling > create your account.
-Complete the identity/payout checks and confirm Saudi payout availability. No
+Complete the identity/payout checks and confirm Egypt payout availability. No
 monthly subscription is required; per-sale fees still apply. Keep it empty until
 you have real, reviewed packs. After a month, download the monthly-product-pack
 artifact within 7 days, review every page, provide a truthful AI disclosure and

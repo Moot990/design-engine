@@ -65,7 +65,7 @@ not promised performance benchmarks. Mark missing metrics as unknown, not zero.
   Keep a theme with demand. Revise its preview and description after 100 qualified
   visits and no sales. Pause a theme with no evidence of demand after two revisions.
 - Affiliate: calculate earnings per outbound click where attribution is available.
-  Check the Saudi account's current attribution windows and exclusions. Never
+  Check the Egypt account's current attribution windows and exclusions. Never
   infer YouTube affiliate sales from video views alone.
 - Overall: retain the channel combination producing qualified traffic or sales
   within the one-hour weekly budget. Do not buy traffic or add subscriptions.

@@ -7,7 +7,7 @@ from datetime import date
 from pathlib import Path
 
 from . import publish
-from .affiliate import AI_NOTICE, DISCLOSURE, affiliate_link
+from .affiliate import AI_NOTICE, DISCLOSURE, affiliate_link, affiliate_program
 from .common import ROOT, EngineError, checkpoint, read_csv, save_json, write_csv
 from .ideas import candidates, image_prompt, ledger_row
 from .media import render_short
@@ -41,9 +41,9 @@ def short_copy(settings, accepted, language, fixture=False):
     if fixture:
         return {"hook": "تفاصيل لغرفة المعيشة" if language == "ar" else "Four details for a calmer living room",
                 "captions": ["توازن الأثاث", "تنويع الخامات", "إضاءة هادئة", "مسار واضح"][:len(accepted)] if language == "ar" else [a["idea"]["format"]["tip"] for a in accepted],
-                "script": "Compare the furniture scale before buying. Mix smooth and woven textures. Add soft lighting and leave a clear walking route. These simple checks help you assess a room before choosing your next piece."}
+                "script": "راجع مقاسات الأثاث قبل الشراء، وسيب مساحة مريحة للحركة حول الكنبة. جرّب تنسيق سطح ناعم مع خامة منسوجة، وضيف إضاءة جانبية هادئة للمساء. التفاصيل البسيطة دي تساعدك تختار قطع مناسبة لغرفة المعيشة من غير زحمة أو مشتريات زيادة." if language == "ar" else "Compare the furniture scale before buying. Mix smooth and woven textures. Add soft lighting and leave a clear walking route. These simple checks help you assess a room before choosing your next piece."}
     concepts = [{"style": a["idea"]["style"]["en"], "lesson": a["idea"]["format"]["tip"]} for a in accepted]
-    value = gemini(settings, f"Write a useful, original {'Arabic' if language == 'ar' else 'English'} interior design Short. Return JSON: hook (max 55 characters), captions (array of {len(accepted)} scene-specific practical tips, each max 80 characters), script (35-45 spoken words total for 24 seconds). Scenes in order: {json.dumps(concepts)}. Connect the lessons naturally, no invented experience, brand names, prices or product match claims. No links. Teach something, do not just list aesthetic words.")
+    value = gemini(settings, f"Write a useful, original {'Arabic' if language == 'ar' else 'English'} interior design Short for {settings.get('audience', 'Egypt and the Arab world')}. Use natural, simple Arabic understandable across the Arab world, with light Egyptian phrasing when Arabic; English is secondary. Return JSON: hook (max 55 characters), captions (array of {len(accepted)} scene-specific practical tips, each max 80 characters), script (35-45 spoken words total for 24 seconds). Scenes in order: {json.dumps(concepts)}. Connect the lessons naturally, no invented experience, brand names, prices or product match claims. No links. Teach something, do not just list aesthetic words.")
     if not isinstance(value, dict) or not isinstance(value.get("hook"), str) or not 1 <= len(value["hook"]) <= 55 or not isinstance(value.get("captions"), list) or len(value["captions"]) != len(accepted) or any(not isinstance(c, str) or not 1 <= len(c) <= 80 for c in value["captions"]) or not isinstance(value.get("script"), str) or not 25 <= len(value["script"].split()) <= 55:
         raise EngineError("Short narration/caption response failed validation")
     return value
@@ -69,6 +69,7 @@ def record_publication(history, state_file, day, key, platform, callback):
 
 
 def run(settings, mode, day, output, state_dir):
+    settings = {**settings, "AFFILIATE_PROGRAM": affiliate_program(settings.get("AFFILIATE_PROGRAM"))}
     fixture = mode == "smoke"
     output, state_dir = Path(output).resolve(), Path(state_dir).resolve()
     output.mkdir(parents=True, exist_ok=True)
@@ -121,8 +122,8 @@ def run(settings, mode, day, output, state_dir):
                 if not approved:
                     raise EngineError("Image failed the required AI visual review")
                 copy = pin_text(settings, idea, fixture)
-                tag = "fixture-21" if fixture else os.environ["AMAZON_ASSOCIATE_TAG"]
-                link = affiliate_link(idea, tag, ROOT / "data/products.csv", date.fromisoformat(day))
+                tag = "fixture-eg" if fixture else os.environ["AMAZON_ASSOCIATE_TAG"]
+                link = affiliate_link(idea, tag, ROOT / "data/products.csv", date.fromisoformat(day), program=settings.get("AFFILIATE_PROGRAM"))
                 product_url = settings.get("digital_product_url", "")
                 if product_url:
                     from urllib.parse import urlparse
@@ -136,7 +137,7 @@ def run(settings, mode, day, output, state_dir):
                 accepted.append({"idea": idea, "image": image, "copy": copy, "link": link})
                 history["images"][hash_] = {"id": idea["id"], "date": day}
                 row["status"] = "accepted"
-                pins.append({"idea_id": idea["id"], "image_file": "image-archive/" + image.name, "title": copy["title"], "description": copy["description"], "link": link, "board": "Living Room Ideas", "board_id": os.environ.get("PINTEREST_BOARD_ID", ""), "language": idea["language"], "status": "fixture" if fixture else "ready-for-manual-upload"})
+                pins.append({"idea_id": idea["id"], "image_file": "image-archive/" + image.name, "title": copy["title"], "description": copy["description"], "link": link, "board": "أفكار لغرفة المعيشة" if idea["language"] == "ar" else "Living Room Ideas", "board_id": os.environ.get("PINTEREST_BOARD_ID", ""), "language": idea["language"], "status": "fixture" if fixture else "ready-for-manual-upload"})
             except EngineError as error:
                 row["status"] = "rejected"
                 image.unlink(missing_ok=True)
@@ -151,7 +152,7 @@ def run(settings, mode, day, output, state_dir):
         short_meta = None
         if len(accepted) >= 4:
             scenes = accepted[:6]
-            language = "ar" if int(day.replace("-", "")) % 2 else "en"
+            language = settings.get("primary_language", "ar")
             try:
                 copy = short_copy(settings, scenes, language, fixture)
                 video, media_warnings = render_short([a["image"] for a in scenes], copy, settings, language, output / "video", fixture=fixture, variant=date.fromisoformat(day).toordinal(), publishing=mode == "publish")
@@ -159,7 +160,7 @@ def run(settings, mode, day, output, state_dir):
                 if not fixture:
                     for frame in (output / "video").glob("frame-*.png"):
                         frame.unlink()
-                description = f"{DISCLOSURE}\n{AI_NOTICE}\n{copy['script']}\n\nSimilar-item inspiration:\n" + "\n".join(a["link"] for a in scenes) + "\nProduct links are not clickable in Shorts descriptions; use the channel profile. #Shorts"
+                description = f"{DISCLOSURE}\n{AI_NOTICE}\n{copy['script']}\n\nمنتجات مشابهة للإلهام / Similar-item inspiration:\n" + "\n".join(a["link"] for a in scenes) + "\nروابط المنتجات في وصف Shorts غير قابلة للنقر؛ استخدم روابط القناة. Product links in Shorts descriptions are not clickable; use the channel profile. #Shorts"
                 ai_report = output / "video/freevideo/freevideo-result.json"
                 if ai_report.exists() and json.loads(ai_report.read_text(encoding="utf-8")).get("used_ai_clips", 0):
                     description += "\nAI video animation: MiniMax H3 via FreeVideo."
@@ -174,7 +175,7 @@ def run(settings, mode, day, output, state_dir):
             for pin, item in zip(pins[:settings["pins_per_day"]], accepted):
                 if os.environ.get("PINTEREST_PUBLISH") == "true":
                     try:
-                        record_publication(history, state_file, day, "pin-" + pin["idea_id"], "pinterest", lambda p=pin, i=item: (publish.pinterest(i["image"], p["title"], p["description"], p["link"], os.environ["PINTEREST_BOARD_ID"]), "public"))
+                        record_publication(history, state_file, day, "pin-" + pin["idea_id"], "pinterest", lambda p=pin, i=item: (publish.pinterest(i["image"], p["title"], p["description"], p["link"], os.environ["PINTEREST_BOARD_ID"], program=settings.get("AFFILIATE_PROGRAM")), "public"))
                     except EngineError as error:
                         warnings.append(str(error))
                         break  # Avoid a batch of ambiguous requests after platform failure.

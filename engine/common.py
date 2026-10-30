@@ -26,6 +26,10 @@ def config():
         raise EngineError("short_seconds must be between 15 and 30")
     if value["youtube_privacy"] not in {"private", "unlisted", "public"}:
         raise EngineError("Invalid YouTube privacy configuration")
+    if value.get("primary_language", "ar") not in {"ar", "en"} or value.get("secondary_language", "en") not in {"ar", "en"}:
+        raise EngineError("Content languages must be ar or en")
+    if not isinstance(value.get("secondary_every_n", 4), int) or value.get("secondary_every_n", 4) < 2:
+        raise EngineError("secondary_every_n must be an integer of at least 2")
     return value
 
 

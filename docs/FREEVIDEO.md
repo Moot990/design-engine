@@ -102,7 +102,7 @@ not your laptop. The workflow is not changed into an unattended laptop worker.
 
 ## Limits, cancellation and fallback
 
-- `.local/freevideo-budget.json` keeps weekly counts in Saudi ISO weeks.
+- `.local/freevideo-budget.json` keeps weekly counts in Egypt ISO weeks.
   Attempts, including failed requests, count before submission. Do not delete it
   to obtain more clips. A lock prevents concurrent runs; a crash lock requires
   checking the app queue before manual recovery.
@@ -127,10 +127,10 @@ not your laptop. The workflow is not changed into an unattended laptop worker.
 ## License and monetization
 
 Read the [MiniMax H3 Community License and Exhibit A](https://huggingface.co/MiniMaxAI/MiniMax-H3/blob/main/LICENSE).
-Saudi Arabia is included. EU, UK, South Korea and US are excluded; section V.4
+Egypt is included. EU, UK, South Korea and US are excluded; section V.4
 also restricts outputs outside the permitted territory. Worldwide YouTube/
 Pinterest distribution is therefore unresolved, not automatically permitted by
-your Saudi location. Ask MiniMax for written clarification before monetized
+your Egypt location. Ask MiniMax for written clarification before monetized
 global distribution; no request has been sent for you.
 
 Commercial terms require prominent MiniMax H3 identification on a commercial

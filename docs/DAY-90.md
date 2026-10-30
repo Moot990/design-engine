@@ -28,7 +28,7 @@ visits and no sale. Pause a theme with no evidence of demand after two revisions
 Do not produce more near-identical PDFs simply to increase the product count.
 
 **Affiliate:** check earnings per outbound click where attribution exists. Use the
-actual Saudi Associates reporting window. Do not infer sales from views or count
+actual Egypt Associates reporting window. Do not infer sales from views or count
 the same earnings under multiple posts. A public search link does not prove a
 qualifying attributed sale.
 

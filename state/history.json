@@ -20,7 +20,7 @@
   "publications": {},
   "runs": {
     "2026-10-30": {
-      "status": "started",
+      "status": "complete",
       "warnings": [],
       "fixture": false,
       "previous_attempts": [
@@ -50,7 +50,10 @@
           "pins_exported": 2,
           "video_ready": false
         }
-      ]
+      ],
+      "accepted": 4,
+      "pins_exported": 4,
+      "video_ready": true
     }
   }
 }

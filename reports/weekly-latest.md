@@ -1,7 +1,7 @@
 # Weekly report: 2026-10-24 to 2026-10-30
 
-- Ideas reserved: 8
-- Accepted image ideas: 2
+- Ideas reserved: 10
+- Accepted image ideas: 4
 - Confirmed uploads: 0
 - Requests needing manual reconciliation: 0
 
@@ -12,7 +12,7 @@
 
 ## Errors and generation outcomes
 
-- 2026-10-30: needs-review; 651afa1b7a40c464: Generated hashtags are malformed; 10b5bec96c4e4333: Generated hashtags are malformed; Short skipped: fewer than four accepted distinct images
+- 2026-10-30: complete; 
 
 ## Metrics you enter
 

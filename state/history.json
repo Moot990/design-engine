@@ -6,7 +6,8 @@
       "status": "started",
       "warnings": [
         "5ec32486adc40bae: Gemini: HTTP 404; check access, quota and workflow readiness",
-        "0091cf8a610f670d: Gemini: HTTP 404; check access, quota and workflow readiness"
+        "0091cf8a610f670d: Gemini: HTTP 404; check access, quota and workflow readiness",
+        "fc83ddecc35425a0: Pollinations image: HTTP 400; check access, quota and workflow readiness"
       ],
       "fixture": false
     }

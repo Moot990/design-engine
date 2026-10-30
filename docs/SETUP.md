@@ -265,3 +265,13 @@ because its listing/payment fees do not meet the strict zero-upfront budget.
 Follow [WEEKLY.md](WEEKLY.md) and fill [DAY-90.md](DAY-90.md) on your review date.
 Account approval delays, earned-credit shortages or mandatory identity checks can
 take longer during setup. Those cannot be automated or resolved by invented data.
+
+### Reviewed zero-output recovery
+
+The normal same-date duplicate guard remains on. After diagnosing a run that
+accepted zero images, exported zero Pins and produced no video, the generate-only
+workflow input `retry_empty=true` permits one deliberate new attempt. Every idea
+from that date must be rejected, with no publication/outbox entries for that date.
+All original failure records remain in `previous_attempts`, and rejected ideas
+stay in the ledger. Completed/partial output and unknown remote results cannot
+use this recovery path. Live provider checks run before spending more image credit.

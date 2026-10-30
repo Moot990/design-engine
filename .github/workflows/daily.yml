@@ -10,6 +10,11 @@ on:
         default: preflight
         type: choice
         options: [preflight, generate, publish]
+      retry_empty:
+        description: 'Reviewed zero-output failure only: preserve history and select new ideas'
+        required: false
+        default: false
+        type: boolean
 permissions:
   contents: write
   actions: read
@@ -78,7 +83,11 @@ jobs:
       - name: Generate or publish daily batch
         env:
           RUN_MODE: ${{ steps.selection.outputs.mode }}
-        run: python -m engine run --mode "$RUN_MODE" --output output/daily
+          RETRY_EMPTY: ${{ inputs.retry_empty }}
+        run: |
+          EXTRA=()
+          if [[ "$RETRY_EMPTY" == true ]]; then EXTRA+=(--retry-empty); fi
+          python -m engine run --mode "$RUN_MODE" --output output/daily "${EXTRA[@]}"
       - name: Save state after interruption or failure
         if: always()
         run: |

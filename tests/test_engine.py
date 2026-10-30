@@ -225,6 +225,29 @@ class EngineTests(unittest.TestCase):
             save.assert_called_once_with("PINTEREST_REFRESH_TOKEN", "rotated-test-refresh")
         pinterest_bearer.cache_clear()
 
+    def test_retry_empty_preserves_failed_history_and_rejected_ideas(self):
+        state = self.directory / "state"
+        state.mkdir()
+        idea = candidates(self.settings, "2026-10-30", [])[0]
+        write_csv(state / "ideas.csv", [ledger_row(idea, "2026-10-30", "rejected")], ["idea_id", "date", "room", "style", "palette", "item", "format", "language", "status"])
+        old = {"status": "needs-review", "accepted": 0, "pins_exported": 0, "video_ready": False, "warnings": ["provider rejected request"]}
+        history = {"images": {}, "publications": {}, "runs": {"2026-10-30": old}}
+        (state / "history.json").write_text(json.dumps(history))
+        with patch("engine.pipeline.readiness", return_value=[]), patch("engine.pipeline.checkpoint"), patch("engine.pipeline.generate_image", side_effect=EngineError("test rejection")):
+            with self.assertRaises(EngineError):
+                run_pipeline(self.settings, "generate", "2026-10-30", self.directory / "new", state, retry_empty=True)
+        saved = json.loads((state / "history.json").read_text())
+        self.assertEqual(saved["runs"]["2026-10-30"]["previous_attempts"], [old])
+        from engine.common import read_csv
+        self.assertEqual(len(read_csv(state / "ideas.csv")), 5)
+        self.assertEqual(read_csv(state / "ideas.csv")[0]["idea_id"], idea["id"])
+        history["publications"]["unknown"] = {"date": "2026-10-30", "status": "unknown"}
+        (state / "history.json").write_text(json.dumps(history))
+        with patch("engine.pipeline.readiness", return_value=[]), patch("engine.pipeline.generate_image") as image:
+            with self.assertRaises(EngineError):
+                run_pipeline(self.settings, "generate", "2026-10-30", self.directory / "blocked", state, retry_empty=True)
+        image.assert_not_called()
+
     def test_full_publishing_control_flow_exports_confirmed_ids_and_blocks_rerun(self):
         state = self.directory / "state"
         state.mkdir()

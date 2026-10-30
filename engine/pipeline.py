@@ -68,7 +68,7 @@ def record_publication(history, state_file, day, key, platform, callback):
     checkpoint("Record confirmed platform upload " + key)
 
 
-def run(settings, mode, day, output, state_dir):
+def run(settings, mode, day, output, state_dir, retry_empty=False):
     settings = {**settings, "AFFILIATE_PROGRAM": affiliate_program(settings.get("AFFILIATE_PROGRAM"))}
     fixture = mode == "smoke"
     output, state_dir = Path(output).resolve(), Path(state_dir).resolve()
@@ -90,9 +90,22 @@ def run(settings, mode, day, output, state_dir):
     state_file = state_dir / "history.json"
     history = json.loads(state_file.read_text(encoding="utf-8"))
     rows = read_csv(state_dir / "ideas.csv")
+    previous_attempts = []
     if day in history["runs"]:
-        raise EngineError("This date is already reserved; do not rerun blindly. Check state and platform results first")
+        old = history["runs"][day]
+        day_rows = [r for r in rows if r["date"] == day]
+        empty_failure = (mode == "generate" and old.get("status") == "needs-review"
+                         and old.get("accepted") == 0 and old.get("pins_exported") == 0
+                         and old.get("video_ready") is False and bool(day_rows)
+                         and all(r["status"] == "rejected" for r in day_rows)
+                         and not any(p.get("date") == day for p in history["publications"].values()))
+        if not retry_empty or not empty_failure:
+            raise EngineError("This date is already reserved; do not rerun blindly. Check state and platform results first")
+        # Deliberate recovery only: retain all rejected ideas and failure evidence.
+        previous_attempts = old.get("previous_attempts", []) + [{k: v for k, v in old.items() if k != "previous_attempts"}]
     history["runs"][day] = {"status": "started", "warnings": [], "fixture": fixture}
+    if previous_attempts:
+        history["runs"][day]["previous_attempts"] = previous_attempts
     save_json(state_file, history)
     if not fixture:
         checkpoint("Reserve daily content batch " + day)

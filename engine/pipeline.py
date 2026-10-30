@@ -128,6 +128,10 @@ def run(settings, mode, day, output, state_dir, retry_empty=False, resume_batch=
         if restored:
             styles_used = {a["idea"]["style"]["id"] for a in restored}
             selected = [idea for idea in selected if idea["style"]["id"] not in styles_used][:idea_count - len(restored)]
+            secondary = settings.get("secondary_language", "en")
+            remaining_secondary = max(0, idea_count // settings.get("secondary_every_n", 4) - sum(a["idea"]["language"] == secondary for a in restored))
+            for index, idea in enumerate(selected):
+                idea["language"] = secondary if index >= len(selected) - remaining_secondary else settings.get("primary_language", "ar")
         for n, idea in enumerate(selected):
             row = ledger_row(idea, day, "reserved")
             rows.append(row)

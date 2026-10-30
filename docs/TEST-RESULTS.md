@@ -111,3 +111,40 @@ seven-day batch; store/payout operations; any new local FreeVideo clip or Medium
 benchmark. FreeVideo remains off by default and publication-gated pending written
 clarification about worldwide output distribution. No publishing or schedules
 were enabled for this correction. Existing persistent state/outbox was preserved.
+
+## First real provider batch — 30 October 2026
+
+[Live run 41078579807](https://github.com/Moot990/design-engine/actions/runs/41078579807):
+**success**, four genuine Pollinations images, Gemini visual review and copy,
+and a 24-second Arabic-narrated ffmpeg Short. No warnings, fixture=false. No
+platform publishing occurred; persistent publication outbox remains empty.
+[Original cloud artifact](https://github.com/Moot990/design-engine/actions/runs/41078579807/artifacts/12987948200)
+expires 6 November 2026. Local reviewed files are under `output/first-real-batch/`.
+
+Earlier attempts are preserved in state/history.json:
+- Run 41076413634 accepted zero images: Gemini 2.5 Flash returned 404 for this
+  account; two image requests also exceeded Pollinations' signed seed range.
+- Switched to the documented free-tier Gemini 3.1 Flash-Lite; bounded image seeds
+  to 0..2147483647 and added a tiny live readiness check before image spending.
+- Run 41077362688 accepted two images; optional malformed hashtags discarded two
+  otherwise reviewed images. Normalize valid tags and omit malformed optional
+  tags; enforce Arabic script for Arabic text.
+- The successful run reused the two accepted images, repaired text and generated
+  only two missing scenes. All rejected ideas and old failure records remain.
+
+All four final images were visually inspected after download. The cloud recovery
+mix was two Arabic/two English Pins. During editorial review, the fourth Pin in
+the local CSV was translated to simple Arabic, giving the intended three Arabic/
+one English mix; provenance language and ledger were updated. Images and Arabic
+video were unchanged. The original cloud artifact remains the original export.
+The recovery selector now preserves the configured language mix, with a regression
+check. See the latest cloud test run for that code change.
+
+Amazon.eg search links include the configured public tracking ID; no manually
+reviewed catalog products were supplied. Descriptions retain AI/affiliate notices.
+No paid credits, model downloads, FreeVideo generation or schedule activation.
+
+Still NOT tested: accepted Amazon social placements or commission attribution,
+real Pinterest/YouTube uploads and OAuth, payouts, a full seven-day real batch,
+commercial audio permissions, or any new FreeVideo/Medium benchmark. Passing AI
+visual checks is not proof of originality, exact product matches or monetization.

@@ -297,7 +297,10 @@ class EngineTests(unittest.TestCase):
         with patch.dict("os.environ", {"AMAZON_ASSOCIATE_TAG": "test-eg"}), patch("engine.pipeline.readiness", return_value=[]), patch("engine.pipeline.checkpoint"), patch("engine.pipeline.generate_image", side_effect=image) as generate, patch("engine.pipeline.vision_review", return_value=True), patch("engine.pipeline.is_duplicate", return_value=False), patch("engine.pipeline.pin_text", return_value=copy), patch("engine.recovery.pin_text", return_value=copy), patch("engine.pipeline.short_copy", return_value=short), patch("engine.pipeline.render_short", side_effect=render):
             run_pipeline(self.settings, "generate", day, output, state, resume_batch=batch)
         self.assertEqual(generate.call_count, 2)
-        self.assertEqual(len(read_csv(output / "pinterest-upload-manifest.csv")), 4)
+        completed = read_csv(output / "pinterest-upload-manifest.csv")
+        self.assertEqual(len(completed), 4)
+        self.assertEqual([p["language"] for p in completed].count("ar"), 3)
+        self.assertEqual([p["language"] for p in completed].count("en"), 1)
         saved = json.loads((state / "history.json").read_text())
         self.assertEqual(saved["runs"][day]["previous_attempts"], [old])
         self.assertEqual(len(saved["images"]), 4)

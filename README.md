@@ -4,9 +4,9 @@ Residential interior content for Egypt and the Arab world, Arabic first and Engl
 Pinterest Pins and faceless Shorts, add Amazon Egypt affiliate links, and prepare monthly
 digital product drafts. Python 3.12. All media processing runs in the cloud.
 
-**Current status:** code deployed; fixture cloud tests pass. Real AI generation,
-platform uploads and affiliate attribution require your accounts and are not yet
-verified. Production schedules are off. No paid service has been enabled.
+**Current status:** the first real four-image batch and Arabic-narrated ffmpeg
+Short passed in GitHub Actions on 30 October 2026. Platform uploads and affiliate
+attribution remain untested; review the exported files before any publication. Production schedules are off. No paid service has been enabled.
 
 Start with the [numbered personal setup checklist](docs/SETUP.md).
 See [current service/terms findings](docs/SERVICE-STATUS.md),

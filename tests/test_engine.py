@@ -83,6 +83,18 @@ class EngineTests(unittest.TestCase):
         short = short_copy(self.settings, [{"idea": idea} for idea in batch], "ar", fixture=True)
         self.assertIn("راجع", short["script"])
 
+    def test_large_image_seed_uses_signed_integer_range(self):
+        from engine.providers import generate_image
+        source = self.directory / "source.jpg"
+        fixture_image(source, 0)
+        response = Mock(headers={"Content-Type": "image/jpeg"}, content=source.read_bytes())
+        with patch("engine.providers.image_account_ready", return_value={}), patch("engine.providers.request", return_value=response) as call:
+            generate_image(self.settings, "A room", 0xFC83DDEC, self.directory / "result.jpg")
+        seed = call.call_args.kwargs["params"]["seed"]
+        self.assertEqual(seed, 0x7C83DDEC)
+        self.assertGreaterEqual(seed, 0)
+        self.assertLessEqual(seed, 2147483647)
+
     def test_csv_formula_injection_is_neutralized(self):
         path = self.directory / "export.csv"
         write_csv(path, [{"title": "=HYPERLINK(1)"}], ["title"])

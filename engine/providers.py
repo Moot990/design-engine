@@ -64,7 +64,8 @@ def image_account_ready(settings):
 
 def generate_image(settings, prompt, seed, destination):
     headers = image_account_ready(settings)  # Recheck balance before EVERY generation.
-    response = request("GET", "https://gen.pollinations.ai/image/" + quote(prompt, safe=""), service="Pollinations image", headers=headers, params={"model": settings["image_model"], "width": 1000, "height": 1500, "seed": seed})
+    # Pollinations accepts signed 32-bit seeds; idea hashes use unsigned values.
+    response = request("GET", "https://gen.pollinations.ai/image/" + quote(prompt, safe=""), service="Pollinations image", headers=headers, params={"model": settings["image_model"], "width": 1000, "height": 1500, "seed": int(seed) % (2 ** 31)})
     if not response.headers.get("Content-Type", "").startswith("image/") or len(response.content) > 15_000_000:
         raise EngineError("Image service did not return a supported image")
     try:

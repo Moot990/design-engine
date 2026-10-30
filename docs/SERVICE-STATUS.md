@@ -22,7 +22,7 @@ daily free generation. It stops rather than switching to a paid service.
 
 [Gemini pricing](https://ai.google.dev/gemini-api/docs/pricing) offers model-specific
 free access; [rate limits](https://ai.google.dev/gemini-api/docs/rate-limits) depend
-on the actual project. The configurable default is `gemini-2.5-flash`.
+on the actual project. The configurable default is `gemini-3.1-flash-lite`.
 Create a project without billing and confirm its free tier in AI Studio. Failed
 quotas do not trigger a paid fallback. AI visual checks are imperfect and cannot
 guarantee designer quality or originality.

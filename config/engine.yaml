@@ -20,7 +20,7 @@ freevideo:
   max_gpu_temperature_c: 82
   # Keep false pending clarification of worldwide output distribution rights.
   publication_cleared: false
-gemini_model: gemini-2.5-flash
+gemini_model: gemini-3.1-flash-lite
 image_model: zimage
 require_vision_review: true
 youtube_privacy: private

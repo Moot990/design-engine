@@ -72,6 +72,9 @@ jobs:
           if [[ "$GITHUB_EVENT_NAME" == schedule && "$AUTO_PUBLISH" == true ]]; then MODE=publish; fi
           echo "mode=$MODE" >> "$GITHUB_OUTPUT"
           echo "day=$(TZ=Africa/Cairo date +%F)" >> "$GITHUB_OUTPUT"
+      - name: Check live providers before image spending
+        if: steps.selection.outputs.mode != 'preflight'
+        run: python -m scripts.check_providers
       - name: Generate or publish daily batch
         env:
           RUN_MODE: ${{ steps.selection.outputs.mode }}

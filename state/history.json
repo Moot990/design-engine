@@ -12,12 +12,8 @@
   "publications": {},
   "runs": {
     "2026-10-30": {
-      "status": "needs-review",
-      "warnings": [
-        "651afa1b7a40c464: Generated hashtags are malformed",
-        "10b5bec96c4e4333: Generated hashtags are malformed",
-        "Short skipped: fewer than four accepted distinct images"
-      ],
+      "status": "started",
+      "warnings": [],
       "fixture": false,
       "previous_attempts": [
         {
@@ -33,11 +29,20 @@
           "accepted": 0,
           "pins_exported": 0,
           "video_ready": false
+        },
+        {
+          "status": "needs-review",
+          "warnings": [
+            "651afa1b7a40c464: Generated hashtags are malformed",
+            "10b5bec96c4e4333: Generated hashtags are malformed",
+            "Short skipped: fewer than four accepted distinct images"
+          ],
+          "fixture": false,
+          "accepted": 2,
+          "pins_exported": 2,
+          "video_ready": false
         }
-      ],
-      "accepted": 2,
-      "pins_exported": 2,
-      "video_ready": false
+      ]
     }
   }
 }

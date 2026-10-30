@@ -4,7 +4,9 @@
   "runs": {
     "2026-10-30": {
       "status": "started",
-      "warnings": [],
+      "warnings": [
+        "5ec32486adc40bae: Gemini: HTTP 404; check access, quota and workflow readiness"
+      ],
       "fixture": false
     }
   }

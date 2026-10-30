@@ -183,7 +183,7 @@ class EngineTests(unittest.TestCase):
         reply = Mock()
         reply.json.return_value = {"id": "12345"}
         with patch("engine.publish.request", return_value=reply) as call, patch("engine.publish.pinterest_bearer", return_value="test-only"):
-            self.assertEqual(pinterest(image, "A useful room idea", DISCLOSURE, "https://www.amazon.eg/s?k=lamp&tag=test-21", "1234"), "12345")
+            self.assertEqual(pinterest(image, "A useful room idea", DISCLOSURE, "https://www.amazon.eg/s?k=lamp&tag=test-eg", "1234"), "12345")
             payload = call.call_args.kwargs["json"]
             self.assertEqual(payload["media_source"]["source_type"], "image_base64")
             self.assertIn("#ad", payload["description"])
@@ -232,7 +232,7 @@ class EngineTests(unittest.TestCase):
             return output, []
         copy = {"title": "A practical room idea", "description": DISCLOSURE, "script": "A practical design lesson."}
         short = {"hook": "Four useful room details", "script": "A useful design lesson", "captions": ["one", "two", "three", "four"]}
-        environment = {"GEMINI_API_KEY": "test", "POLLINATIONS_API_KEY": "test", "AMAZON_ASSOCIATE_TAG": "test-21", "GEMINI_FREE_TIER_CONFIRMED": "true", "POLLINATIONS_QUEST_ONLY": "true", "PINTEREST_PUBLISH": "true", "YOUTUBE_PUBLISH": "true", "PINTEREST_ACCESS_TOKEN": "test", "PINTEREST_BOARD_ID": "123", "PINTEREST_REFRESH_TOKEN": "", "YOUTUBE_CLIENT_ID": "test", "YOUTUBE_CLIENT_SECRET": "test", "YOUTUBE_REFRESH_TOKEN": "test", "PUBLISHING_REVIEWED": "true", "ACTIONS_PRODUCTION_APPROVED": "true"}
+        environment = {"GEMINI_API_KEY": "test", "POLLINATIONS_API_KEY": "test", "AMAZON_ASSOCIATE_TAG": "test-eg", "GEMINI_FREE_TIER_CONFIRMED": "true", "POLLINATIONS_QUEST_ONLY": "true", "PINTEREST_PUBLISH": "true", "YOUTUBE_PUBLISH": "true", "PINTEREST_ACCESS_TOKEN": "test", "PINTEREST_BOARD_ID": "123", "PINTEREST_REFRESH_TOKEN": "", "YOUTUBE_CLIENT_ID": "test", "YOUTUBE_CLIENT_SECRET": "test", "YOUTUBE_REFRESH_TOKEN": "test", "PUBLISHING_REVIEWED": "true", "ACTIONS_PRODUCTION_APPROVED": "true"}
         with patch.dict("os.environ", environment), patch("engine.pipeline.ROOT", self.directory), patch("engine.pipeline.checkpoint"), patch("engine.pipeline.generate_image", side_effect=image), patch("engine.pipeline.vision_review", return_value=True), patch("engine.pipeline.is_duplicate", return_value=False), patch("engine.pipeline.pin_text", return_value=copy), patch("engine.pipeline.short_copy", return_value=short), patch("engine.pipeline.render_short", side_effect=render), patch("engine.pipeline.publish.pinterest", return_value="pin123") as pin, patch("engine.pipeline.publish.youtube", return_value=("video123", "private")) as video:
             output = self.directory / "output"
             run_pipeline(self.settings, "publish", "2026-10-29", output, state)

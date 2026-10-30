@@ -126,7 +126,7 @@ not your laptop. The workflow is not changed into an unattended laptop worker.
 
 ## License and monetization
 
-Read the [MiniMax H3 Community License and Exhibit A](https://huggingface.co/MiniMaxAI/MiniMax-H3/blob/main/LICENSE).
+Rechecked for Egypt on 30 October 2026. Read the [MiniMax H3 Community License and Exhibit A](https://huggingface.co/MiniMaxAI/MiniMax-H3/blob/main/LICENSE).
 Egypt is included. EU, UK, South Korea and US are excluded; section V.4
 also restricts outputs outside the permitted territory. Worldwide YouTube/
 Pinterest distribution is therefore unresolved, not automatically permitted by

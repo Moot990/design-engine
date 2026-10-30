@@ -140,7 +140,7 @@ def pin_text(settings, idea, fixture=False):
             f"Concept: {idea['style']['en']} {idea['room']['en']}, {idea['palette']['en']}, "
             f"{idea['item']['en']}. Teaching point: {idea['format']['tip']}. "
             "Return JSON with title (under 100 characters), description (under 260 characters, "
-            "natural search keywords), hashtags (array, maximum 4), script (a practical 35-45 word lesson). "
+            f"natural search keywords), hashtags (array, maximum 4), script (a practical {'25-30' if language == 'ar' else '35-45'} word lesson). "
             "No prices, brand names, product-match claims, unverifiable claims, fake personal experiences, "
             "affiliate links, medical or structural advice. Do not describe it as a real built project."
         ))

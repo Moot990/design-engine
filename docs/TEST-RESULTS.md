@@ -69,7 +69,7 @@ were uploaded. No generation or publishing was attempted by that run.
 - Gemini text and AI visual review on real interiors.
 - Pinterest app approval, real Pin creation and actual OAuth/secret rotation.
 - YouTube OAuth authorization, processing, actual uploads and channel policy checks.
-- Amazon.sa approval, permitted placements and actual commission attribution.
+- Amazon Egypt approval, permitted placements and actual commission attribution.
 - Genuine monthly archive collection and store listings/payouts.
 - GitHub confirmation that this ongoing production workload is permitted.
 

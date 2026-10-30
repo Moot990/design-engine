@@ -3,18 +3,25 @@
   "publications": {},
   "runs": {
     "2026-10-30": {
-      "status": "needs-review",
-      "warnings": [
-        "5ec32486adc40bae: Gemini: HTTP 404; check access, quota and workflow readiness",
-        "0091cf8a610f670d: Gemini: HTTP 404; check access, quota and workflow readiness",
-        "fc83ddecc35425a0: Pollinations image: HTTP 400; check access, quota and workflow readiness",
-        "aa69b8f770eb142d: Pollinations image: HTTP 400; check access, quota and workflow readiness",
-        "Short skipped: fewer than four accepted distinct images"
-      ],
+      "status": "started",
+      "warnings": [],
       "fixture": false,
-      "accepted": 0,
-      "pins_exported": 0,
-      "video_ready": false
+      "previous_attempts": [
+        {
+          "status": "needs-review",
+          "warnings": [
+            "5ec32486adc40bae: Gemini: HTTP 404; check access, quota and workflow readiness",
+            "0091cf8a610f670d: Gemini: HTTP 404; check access, quota and workflow readiness",
+            "fc83ddecc35425a0: Pollinations image: HTTP 400; check access, quota and workflow readiness",
+            "aa69b8f770eb142d: Pollinations image: HTTP 400; check access, quota and workflow readiness",
+            "Short skipped: fewer than four accepted distinct images"
+          ],
+          "fixture": false,
+          "accepted": 0,
+          "pins_exported": 0,
+          "video_ready": false
+        }
+      ]
     }
   }
 }

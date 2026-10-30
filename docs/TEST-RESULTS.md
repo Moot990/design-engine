@@ -75,3 +75,39 @@ were uploaded. No generation or publishing was attempted by that run.
 
 No views, sales, commissions or ad eligibility are claimed. Credentials have not
 been invented or borrowed, and no paid endpoint has been substituted.
+
+## Egypt correction — 30 October 2026
+
+[Run 41060533239](https://github.com/Moot990/design-engine/actions/runs/41060533239)
+on commit `07e11b9`: **success**.
+[Download the fixture artifact](https://github.com/Moot990/design-engine/actions/runs/41060533239/artifacts/12977244982)
+before 6 November 2026.
+
+- All **26 behavioral tests passed**, including market override, wrong-market
+  product URL rejection, canonical URL retagging, URL safety and Arabic-first mix.
+- Four placeholder Pin rows: three Arabic, one English, all using Amazon.eg
+  search links and a nonfunctional `fixture-eg` tracking placeholder. No real
+  catalog products, account identity or commission tracking were used.
+- Daily ffmpeg and `run_weekly.py --allow-fixtures` rendered 24-second Shorts;
+  weekly result has zero AI clips, no warnings and `publication_cleared=false`.
+- Separate live speech probes succeeded in English and Egyptian Arabic. The
+  complete Arabic narrated fixture Short contains audio, with no warnings.
+  Its source overlay frame was visually inspected after artifact download.
+- The initial Egypt run (41060189497) correctly fell back to captions only for
+  an overlong Arabic narration. The sample and Arabic generation prompt were
+  shortened before the successful rerun. Actual Gemini copy is still untested.
+- Fixture PDFs and previews rendered again. The live no-key image probe returned
+  HTTP 401; authenticated image generation was not attempted.
+
+Downloaded results are under ignored `output/egypt-dry-run/`: `smoke/` holds image
+cards and both CSVs; `weekly-test/` holds the ffmpeg reassembly/result and video
+manifest; `voiced-ar-test/short.mp4` is the narrated Arabic placeholder preview.
+All are test fixtures, never publish or sell. This is one daily export reassembled
+by the weekly command, not a full seven-day real weekly batch.
+
+Not tested: actual Amazon Egypt product availability, accepted social placements
+or attribution; live Gemini/Pollinations generation; publishing/OAuth; a real
+seven-day batch; store/payout operations; any new local FreeVideo clip or Medium
+benchmark. FreeVideo remains off by default and publication-gated pending written
+clarification about worldwide output distribution. No publishing or schedules
+were enabled for this correction. Existing persistent state/outbox was preserved.

@@ -138,7 +138,10 @@ the local CSV was translated to simple Arabic, giving the intended three Arabic/
 one English mix; provenance language and ledger were updated. Images and Arabic
 video were unchanged. The original cloud artifact remains the original export.
 The recovery selector now preserves the configured language mix, with a regression
-check. See the latest cloud test run for that code change.
+check. [Cloud run 41079295223](https://github.com/Moot990/design-engine/actions/runs/41079295223)
+on `bc5eb37` passed all 30 tests, including reuse of two existing images, generation
+of only two new images, Arabic-first recovery and blocking unknown publication
+outcomes. Fixture ffmpeg/PDF rendering and live speech probes also passed.
 
 Amazon.eg search links include the configured public tracking ID; no manually
 reviewed catalog products were supplied. Descriptions retain AI/affiliate notices.

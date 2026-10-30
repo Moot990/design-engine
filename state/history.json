@@ -5,7 +5,8 @@
     "2026-10-30": {
       "status": "started",
       "warnings": [
-        "651afa1b7a40c464: Generated hashtags are malformed"
+        "651afa1b7a40c464: Generated hashtags are malformed",
+        "10b5bec96c4e4333: Generated hashtags are malformed"
       ],
       "fixture": false,
       "previous_attempts": [

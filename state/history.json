@@ -4,7 +4,9 @@
   "runs": {
     "2026-10-30": {
       "status": "started",
-      "warnings": [],
+      "warnings": [
+        "651afa1b7a40c464: Generated hashtags are malformed"
+      ],
       "fixture": false,
       "previous_attempts": [
         {

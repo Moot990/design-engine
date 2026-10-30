@@ -1,7 +1,7 @@
 # Weekly report: 2026-10-24 to 2026-10-30
 
-- Ideas reserved: 4
-- Accepted image ideas: 0
+- Ideas reserved: 8
+- Accepted image ideas: 2
 - Confirmed uploads: 0
 - Requests needing manual reconciliation: 0
 
@@ -12,7 +12,7 @@
 
 ## Errors and generation outcomes
 
-- 2026-10-30: needs-review; 5ec32486adc40bae: Gemini: HTTP 404; check access, quota and workflow readiness; 0091cf8a610f670d: Gemini: HTTP 404; check access, quota and workflow readiness; fc83ddecc35425a0: Pollinations image: HTTP 400; check access, quota and workflow readiness; aa69b8f770eb142d: Pollinations image: HTTP 400; check access, quota and workflow readiness; Short skipped: fewer than four accepted distinct images
+- 2026-10-30: needs-review; 651afa1b7a40c464: Generated hashtags are malformed; 10b5bec96c4e4333: Generated hashtags are malformed; Short skipped: fewer than four accepted distinct images
 
 ## Metrics you enter
 

@@ -15,6 +15,11 @@ on:
         required: false
         default: false
         type: boolean
+      resume_run_id:
+        description: 'Reviewed partial generate-only run ID; reuse its accepted images'
+        required: false
+        default: ''
+        type: string
 permissions:
   contents: write
   actions: read
@@ -84,9 +89,16 @@ jobs:
         env:
           RUN_MODE: ${{ steps.selection.outputs.mode }}
           RETRY_EMPTY: ${{ inputs.retry_empty }}
+          RESUME_RUN_ID: ${{ inputs.resume_run_id }}
+          BATCH_DAY: ${{ steps.selection.outputs.day }}
         run: |
           EXTRA=()
           if [[ "$RETRY_EMPTY" == true ]]; then EXTRA+=(--retry-empty); fi
+          if [[ -n "$RESUME_RUN_ID" ]]; then
+            [[ "$RUN_MODE" == generate && "$RESUME_RUN_ID" =~ ^[0-9]+$ ]] || exit 2
+            gh run download "$RESUME_RUN_ID" --repo "$GITHUB_REPOSITORY" --name "daily-batch-$BATCH_DAY-$RESUME_RUN_ID" --dir output/resume
+            EXTRA+=(--resume-batch output/resume)
+          fi
           python -m engine run --mode "$RUN_MODE" --output output/daily "${EXTRA[@]}"
       - name: Save state after interruption or failure
         if: always()

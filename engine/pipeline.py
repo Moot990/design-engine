@@ -68,7 +68,7 @@ def record_publication(history, state_file, day, key, platform, callback):
     checkpoint("Record confirmed platform upload " + key)
 
 
-def run(settings, mode, day, output, state_dir, retry_empty=False):
+def run(settings, mode, day, output, state_dir, retry_empty=False, resume_batch=None):
     settings = {**settings, "AFFILIATE_PROGRAM": affiliate_program(settings.get("AFFILIATE_PROGRAM"))}
     fixture = mode == "smoke"
     output, state_dir = Path(output).resolve(), Path(state_dir).resolve()
@@ -90,6 +90,9 @@ def run(settings, mode, day, output, state_dir, retry_empty=False):
     state_file = state_dir / "history.json"
     history = json.loads(state_file.read_text(encoding="utf-8"))
     rows = read_csv(state_dir / "ideas.csv")
+    restored, restored_pins = [], []
+    archive = output / "image-archive"
+    archive.mkdir(exist_ok=True)
     previous_attempts = []
     if day in history["runs"]:
         old = history["runs"][day]
@@ -99,8 +102,16 @@ def run(settings, mode, day, output, state_dir, retry_empty=False):
                          and old.get("video_ready") is False and bool(day_rows)
                          and all(r["status"] == "rejected" for r in day_rows)
                          and not any(p.get("date") == day for p in history["publications"].values()))
-        if not retry_empty or not empty_failure:
+        resume_allowed = (mode == "generate" and old.get("status") == "needs-review"
+                          and 0 < old.get("accepted", 0) < settings["pins_per_day"]
+                          and old.get("video_ready") is False and bool(day_rows)
+                          and all(r["status"] in {"accepted", "rejected"} for r in day_rows)
+                          and not any(p.get("date") == day for p in history["publications"].values()))
+        if not ((retry_empty and empty_failure) or (resume_batch and resume_allowed)):
             raise EngineError("This date is already reserved; do not rerun blindly. Check state and platform results first")
+        if resume_batch:
+            from .recovery import restore_batch
+            restored, restored_pins = restore_batch(settings, resume_batch, day, rows, history, archive)
         # Deliberate recovery only: retain all rejected ideas and failure evidence.
         previous_attempts = old.get("previous_attempts", []) + [{k: v for k, v in old.items() if k != "previous_attempts"}]
     history["runs"][day] = {"status": "started", "warnings": [], "fixture": fixture}
@@ -110,12 +121,13 @@ def run(settings, mode, day, output, state_dir, retry_empty=False):
     if not fixture:
         checkpoint("Reserve daily content batch " + day)
     warnings = history["runs"][day]["warnings"]
-    accepted, pins = [], []
-    archive = output / "image-archive"
-    archive.mkdir(exist_ok=True)
+    accepted, pins = restored, restored_pins
     try:
         idea_count = max(4, settings["pins_per_day"])
         selected = candidates(settings, day, rows, idea_count)
+        if restored:
+            styles_used = {a["idea"]["style"]["id"] for a in restored}
+            selected = [idea for idea in selected if idea["style"]["id"] not in styles_used][:idea_count - len(restored)]
         for n, idea in enumerate(selected):
             row = ledger_row(idea, day, "reserved")
             rows.append(row)

@@ -275,3 +275,10 @@ from that date must be rejected, with no publication/outbox entries for that dat
 All original failure records remain in `previous_attempts`, and rejected ideas
 stay in the ledger. Completed/partial output and unknown remote results cannot
 use this recovery path. Live provider checks run before spending more image credit.
+
+For a reviewed incomplete generate-only batch with accepted images but no video,
+`resume_run_id` downloads that run's same-date artifact. The engine verifies
+provenance, image fingerprints and ledger IDs, repairs text and reuses accepted
+images; it generates only the missing scenes. Every failure stays in
+`previous_attempts`. Any publication/outbox entry blocks this recovery. This is
+an explicit export repair, never a publishing retry or a new production schedule.

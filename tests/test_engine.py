@@ -95,6 +95,17 @@ class EngineTests(unittest.TestCase):
         self.assertGreaterEqual(seed, 0)
         self.assertLessEqual(seed, 2147483647)
 
+    def test_optional_hashtags_are_normalized_without_discarding_arabic_copy(self):
+        idea = candidates(self.settings, "2026-10-29", [])[0]
+        value = {"title": "غرفة معيشة بسيطة", "description": "اختار خامات مناسبة لمساحة الغرفة.", "script": " ".join(["اختار خامات مناسبة"] * 10), "hashtags": ["ديكور", " #غرفة_المعيشة ", "https://bad.test", 4]}
+        with patch("engine.providers.gemini", return_value=value.copy()):
+            copy = pin_text(self.settings, idea)
+        self.assertIn("#ديكور #غرفة_المعيشة", copy["description"])
+        self.assertNotIn("bad.test", copy["description"])
+        with patch("engine.providers.gemini", return_value={**value, "title": "English title"}):
+            with self.assertRaises(EngineError):
+                pin_text(self.settings, idea)
+
     def test_csv_formula_injection_is_neutralized(self):
         path = self.directory / "export.csv"
         write_csv(path, [{"title": "=HYPERLINK(1)"}], ["title"])
@@ -247,6 +258,56 @@ class EngineTests(unittest.TestCase):
             with self.assertRaises(EngineError):
                 run_pipeline(self.settings, "generate", "2026-10-30", self.directory / "blocked", state, retry_empty=True)
         image.assert_not_called()
+
+    def test_resume_reuses_two_accepted_images_and_generates_only_two_more(self):
+        from engine.pipeline import IDEA_FIELDS, PIN_FIELDS
+        from engine.common import read_csv
+        state, batch, output = [self.directory / name for name in ("state", "partial", "completed")]
+        state.mkdir()
+        archive = batch / "image-archive"
+        archive.mkdir(parents=True)
+        day = "2026-10-27"
+        choices = candidates(self.settings, day, [])
+        ideas = [choices[0], choices[3]]
+        pins, hashes = [], {}
+        for n, idea in enumerate(ideas):
+            image = archive / (idea["id"] + ".jpg")
+            fixture_image(image, n)
+            image.with_suffix(".json").write_text(json.dumps({"id": idea["id"], "fixture": False, "vision_approved": True}))
+            hashes[fingerprint(image)] = {"id": idea["id"], "date": day}
+            pins.append({"idea_id": idea["id"], "image_file": "image-archive/" + image.name, "title": "old", "description": "old", "link": "https://www.amazon.eg/s?k=lamp&tag=test-eg", "language": idea["language"], "status": "ready-for-manual-upload"})
+        write_csv(batch / "pinterest-upload-manifest.csv", pins, PIN_FIELDS)
+        (batch / "readiness.json").write_text(json.dumps({"mode": "generate", "date": day, "fixture": False}))
+        write_csv(state / "ideas.csv", [ledger_row(idea, day, "accepted") for idea in ideas], IDEA_FIELDS)
+        old = {"status": "needs-review", "accepted": 2, "pins_exported": 2, "video_ready": False, "warnings": ["malformed copy"]}
+        history = {"images": hashes, "publications": {}, "runs": {day: old}}
+        (state / "history.json").write_text(json.dumps(history))
+        counter = [2]
+        def image(settings, prompt, seed, destination):
+            fixture_image(destination, counter[0])
+            counter[0] += 1
+        def render(images, copy, settings, language, directory, **kwargs):
+            self.assertEqual(len(images), 4)
+            directory.mkdir(parents=True)
+            path = directory / "short.mp4"
+            path.write_bytes(b"mock render")
+            return path, []
+        copy = {"title": "نص مراجع", "description": DISCLOSURE, "script": "نص مراجع"}
+        short = {"hook": "تفاصيل للمعيشة", "script": "نص مراجع", "captions": ["one", "two", "three", "four"]}
+        with patch.dict("os.environ", {"AMAZON_ASSOCIATE_TAG": "test-eg"}), patch("engine.pipeline.readiness", return_value=[]), patch("engine.pipeline.checkpoint"), patch("engine.pipeline.generate_image", side_effect=image) as generate, patch("engine.pipeline.vision_review", return_value=True), patch("engine.pipeline.is_duplicate", return_value=False), patch("engine.pipeline.pin_text", return_value=copy), patch("engine.recovery.pin_text", return_value=copy), patch("engine.pipeline.short_copy", return_value=short), patch("engine.pipeline.render_short", side_effect=render):
+            run_pipeline(self.settings, "generate", day, output, state, resume_batch=batch)
+        self.assertEqual(generate.call_count, 2)
+        self.assertEqual(len(read_csv(output / "pinterest-upload-manifest.csv")), 4)
+        saved = json.loads((state / "history.json").read_text())
+        self.assertEqual(saved["runs"][day]["previous_attempts"], [old])
+        self.assertEqual(len(saved["images"]), 4)
+        self.assertEqual(saved["publications"], {})
+        history["publications"]["unknown"] = {"date": day, "status": "unknown"}
+        (state / "history.json").write_text(json.dumps(history))
+        with patch("engine.pipeline.readiness", return_value=[]), patch("engine.recovery.restore_batch") as restore:
+            with self.assertRaises(EngineError):
+                run_pipeline(self.settings, "generate", day, self.directory / "blocked", state, resume_batch=batch)
+        restore.assert_not_called()
 
     def test_full_publishing_control_flow_exports_confirmed_ids_and_blocks_rerun(self):
         state = self.directory / "state"

@@ -5,6 +5,7 @@ import io
 import json
 import math
 import os
+import re
 from pathlib import Path
 from urllib.parse import quote
 
@@ -136,14 +137,15 @@ def pin_text(settings, idea, fixture=False):
             value.update(title=f"اختبار: غرفة معيشة بطابع {idea['style']['ar']}", description="عينة اختبار فقط: راجع المقاسات وسيب مساحة للحركة قبل اختيار الأثاث.", script="جرّب تنسيق الخامات بهدوء، وقارن مقاسات الأثاث بمساحة الغرفة قبل الشراء. سيب طريق واضح للحركة وضيف إضاءة جانبية مريحة للمساء. الصور دي عينات اختبار وليست تصميمات حقيقية أو منتجات مطابقة.", hashtags=["#ديكور", "#غرفة_المعيشة"])
     else:
         value = gemini(settings, (
-            f"Audience: {settings.get('audience', 'Egypt and the Arab world')}. When writing Arabic, use natural, simple Arabic with light Egyptian phrasing, understandable across the Arab world; avoid stiff translations. English is secondary. "
+            f"Audience: {settings.get('audience', 'Egypt and the Arab world')}. When writing Arabic, use natural, simple Arabic with light Egyptian phrasing, understandable across the Arab world; avoid stiff translations. "
             f"Write original residential interior design content in {'Arabic' if language == 'ar' else 'English'}. "
             f"Concept: {idea['style']['en']} {idea['room']['en']}, {idea['palette']['en']}, "
             f"{idea['item']['en']}. Teaching point: {idea['format']['tip']}. "
             "Return JSON with title (under 100 characters), description (under 260 characters, "
             f"natural search keywords), hashtags (array, maximum 4), script (a practical {'25-30' if language == 'ar' else '35-45'} word lesson). "
             "No prices, brand names, product-match claims, unverifiable claims, fake personal experiences, "
-            "affiliate links, medical or structural advice. Do not describe it as a real built project."
+            "affiliate links, medical or structural advice. Do not describe it as a real built project. "
+            + ("MANDATORY: title, description and script must be in Arabic script, not English. Hashtags must start with #, e.g. #ديكور." if language == "ar" else "All title, description and script text must be in English. Hashtags must start with #.")
         ))
     required = ("title", "description", "script")
     if not isinstance(value, dict) or any(not isinstance(value.get(k), str) or not value[k].strip() for k in required):
@@ -153,9 +155,12 @@ def pin_text(settings, idea, fixture=False):
             raise EngineError("Generated text exceeded title, description or narration limits")
     if any("http" in value[k].lower() for k in required):
         raise EngineError("Generated text contains an unsolicited link")
+    if language == "ar" and any(not re.search(r"[\u0621-\u064a]", value[k]) for k in required):
+        raise EngineError("Arabic content response did not use Arabic script")
     tags = value.get("hashtags", [])
-    if not isinstance(tags, list) or any(not isinstance(t, str) or not t.startswith("#") for t in tags):
-        raise EngineError("Generated hashtags are malformed")
+    # Optional hashtags must not discard an otherwise approved image. Normalize
+    # plain words; omit malformed values rather than passing links/markup onward.
+    tags = ["#" + t.strip().lstrip("#") for t in tags if isinstance(t, str) and re.fullmatch(r"#?\w{1,40}", t.strip())] if isinstance(tags, list) else []
     value["description"] = f"{DISCLOSURE}\n{value['description']}\n{AI_NOTICE}\n{' '.join(tags[:4])}"
     if len(value["description"]) > 800:
         raise EngineError("Pin description exceeds platform limit")

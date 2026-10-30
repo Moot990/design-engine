@@ -22,6 +22,7 @@ def main():
     parser.add_argument("--images", default="output/daily/image-archive")
     parser.add_argument("--fixture", action="store_true")
     parser.add_argument("--retry-empty", action="store_true", help="Explicit generate-only recovery of a reviewed zero-output failure; preserve all history")
+    parser.add_argument("--resume-batch", help="Reviewed incomplete generate-only artifact; reuse accepted images without republishing")
     args = parser.parse_args()
     settings = config()
     day = args.day or datetime.now(ZoneInfo(settings["timezone"])).date().isoformat()
@@ -30,7 +31,7 @@ def main():
         if args.command == "run":
             if args.mode == "smoke" and Path(args.state).resolve() == (ROOT / "state").resolve():
                 raise EngineError("Smoke tests must use an isolated --state directory")
-            run(settings, args.mode, day, args.output, args.state, retry_empty=args.retry_empty)
+            run(settings, args.mode, day, args.output, args.state, retry_empty=args.retry_empty, resume_batch=args.resume_batch)
         elif args.command == "pack":
             entries = []
             for path in sorted(Path(args.images).rglob("*.json")):
